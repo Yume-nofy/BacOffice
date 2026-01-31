@@ -1,0 +1,1 @@
+javac -cp "WEB-INF\lib\framework.jar;C:\xampp\tomcat\lib\servlet-api.jar" WEB-INF\classes\controller\*.java -parameters 

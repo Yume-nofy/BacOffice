@@ -1,0 +1,86 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+           http://maven.apache.org/POM/4.0.0
+           http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>custom.mvc</groupId>
+    <artifactId>my-framework-app</artifactId>
+    <version>1.0</version>
+    <packaging>war</packaging>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- 🔗 Dépendances -->
+    <dependencies>
+
+        <!-- Servlet API (fourni par le serveur) -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Ton framework MVC -->
+        <dependency>
+            <groupId>local.mvc</groupId>
+            <artifactId>framework</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/framework.jar</systemPath>
+        </dependency>
+
+    </dependencies>
+
+    <!-- 🛠 Configuration build -->
+    <build>
+
+        <!-- ⚠️ On dit à Maven où est le Java -->
+        <sourceDirectory>${project.basedir}/classes</sourceDirectory>
+
+        <!-- ⚠️ Dossier web (views + web.xml) -->
+        <plugins>
+
+            <!-- Compilation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+            </plugin>
+
+            <!-- WAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+
+                    <!-- Racine web -->
+                    <warSourceDirectory>${project.basedir}</warSourceDirectory>
+
+                    <!-- web.xml à la racine -->
+                    <webXml>${project.basedir}/web.xml</webXml>
+
+                    <!-- Inclure les views -->
+                    <webResources>
+                        <resource>
+                            <directory>${project.basedir}/views</directory>
+                            <targetPath>views</targetPath>
+                        </resource>
+                    </webResources>
+
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+</project>
