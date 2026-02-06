@@ -43,7 +43,14 @@ public class ReservationController {
         LocalDateTime dt = LocalDateTime.parse(dateArrivee);
         Reservation reservation = new Reservation(idClient, idHotel, nbPassager, dt);
         reservationDAO.addReservation(reservation);
-         return listReservations();
+        List<Hotel> hotels = hotelDAO.getAllHotels(); 
+        List<Reservation> reservations = reservationDAO.getAllReservations();
+
+        ModelView mv = new ModelView("reservations.jsp");
+        mv.addObject("reservation", reservation);
+        mv.addObject("reservations", reservations);
+        mv.addObject("hotels", hotels); 
+        return mv;
     }
 
     @UrlAnnotation(url = "/api/reservations", method = "GET")
