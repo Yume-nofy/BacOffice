@@ -1,33 +1,26 @@
 @echo off
+title Build & Deploy (Windows)
 echo ===============================
-echo 🚀 Build & Deploy (Windows)
+echo   Build ^& Deploy (Windows)
 echo ===============================
 
-REM Nettoyage et build
+:: Build Maven
+:: On utilise 'call' car mvn est souvent un fichier .cmd ou .bat
 call mvn clean package
-IF %ERRORLEVEL% NEQ 0 (
-    echo ❌ Erreur Maven
+
+:: Vérification de l'erreur (équivalent de set -e)
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [ERREUR] Le build Maven a echoue.
     pause
-    exit /b 1
+    exit /b %ERRORLEVEL%
 )
 
-REM Vérification des fichiers
-IF NOT EXIST target\webapp-runner.jar (
-    echo ❌ webapp-runner.jar introuvable
-    pause
-    exit /b 1
-)
+echo.
+echo  Build OK
+echo  Lancement de l'application...
 
-IF NOT EXIST target\my-framework-app.war (
-    echo ❌ WAR introuvable
-    pause
-    exit /b 1
-)
-
-echo ✅ Build OK
-echo ▶️ Lancement de l'application...
-
-REM Lancer Tomcat embarqué
-java -jar target\webapp-runner.jar target\my-framework-app.war
+:: Lancer l'application
+java -jar target\dependency\webapp-runner.jar target\my-framework-app.war
 
 pause
