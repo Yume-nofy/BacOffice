@@ -57,7 +57,7 @@
     <h3>Ajouter une nouvelle Réservation</h3>
 </div>
 
-<form action="reservation/add" method="post">
+<form action="${pageContext.request.contextPath}/reservation/add" method="post">
     <label>ID Client (String):</label>
     <input type="text" name="idClient" placeholder="Ex: FB-12345" required />
 
