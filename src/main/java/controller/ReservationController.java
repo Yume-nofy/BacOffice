@@ -8,6 +8,8 @@ import framework.UrlAnnotation;
 
 import dao.ReservationDAO;
 import model.Reservation;
+import dao.HotelDAO; 
+import model.Hotel;
 
 import java.time.format.DateTimeParseException;
 import java.time.LocalDateTime;
@@ -19,12 +21,15 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationDAO reservationDAO = new ReservationDAO();
-
+    private final HotelDAO hotelDAO = new HotelDAO();
     @UrlAnnotation(url = "/reservations", method = "GET")
     public ModelView listReservations() {
-        List<Reservation> reservations = reservationDAO.getAllReservations();
+     List<Reservation> reservations = reservationDAO.getAllReservations();
+        List<Hotel> hotels = hotelDAO.getAllHotels(); 
+
         ModelView mv = new ModelView("reservations.jsp");
         mv.addObject("reservations", reservations);
+        mv.addObject("hotels", hotels); 
         return mv;
     }
 
@@ -38,10 +43,7 @@ public class ReservationController {
         LocalDateTime dt = LocalDateTime.parse(dateArrivee);
         Reservation reservation = new Reservation(idClient, idHotel, nbPassager, dt);
         reservationDAO.addReservation(reservation);
-         List<Reservation> reservations = reservationDAO.getAllReservations();
-        ModelView mv = new ModelView("reservations.jsp");
-        mv.addObject("reservations", reservations);
-        return mv;
+         return listReservations();
     }
 
     @UrlAnnotation(url = "/api/reservations", method = "GET")
