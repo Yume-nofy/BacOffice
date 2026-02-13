@@ -37,7 +37,7 @@ public class ReservationDAO {
     // Lister toutes les réservations
     public List<Reservation> getAllReservations() {
         List<Reservation> reservations = new ArrayList<>();
-        String sql = "SELECT * FROM reservation";
+        String sql = "SELECT * FROM reservation r join  hotel h on h.id=r.idhotel";
 
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement();
@@ -49,7 +49,8 @@ public class ReservationDAO {
                         rs.getString("idclient"),
                         rs.getInt("idhotel"),
                         rs.getInt("nb_passager"),
-                        rs.getTimestamp("date_arrivee").toLocalDateTime()
+                        rs.getTimestamp("date_arrivee").toLocalDateTime(),
+                        rs.getString("nom")
                 );
                 reservations.add(r);
             }
@@ -63,7 +64,7 @@ public class ReservationDAO {
 
     // Chercher une réservation par id
     public Reservation getReservationById(int id) {
-        String sql = "SELECT * FROM reservation WHERE id = ?";
+        String sql = "CT * FROM reservation r join  hotel h on h.id=r.idhotel WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -75,7 +76,8 @@ public class ReservationDAO {
                             rs.getString("idclient"),
                             rs.getInt("idhotel"),
                             rs.getInt("nb_passager"),
-                            rs.getTimestamp("date_arrivee").toLocalDateTime()
+                            rs.getTimestamp("date_arrivee").toLocalDateTime(),
+                            rs.getString("nom")
                     );
                 }
             }
