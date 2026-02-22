@@ -9,7 +9,7 @@ public class Reservation {
     private int idHotel;
     private int nbPassager;
     private LocalDateTime dateArrivee;
-
+    private String nomHotel; // Ajouté pour stocker le nom de l'hôtel
     // Constructeurs
     public Reservation() {
     }
@@ -21,12 +21,13 @@ public class Reservation {
         this.dateArrivee = dateArrivee;
     }
 
-    public Reservation(int id, String idClient, int idHotel, int nbPassager, LocalDateTime dateArrivee) {
+    public Reservation(int id, String idClient, int idHotel, int nbPassager, LocalDateTime dateArrivee,String nomHotel) {
         this.id = id;
         this.idClient = idClient;
         this.idHotel = idHotel;
         this.nbPassager = nbPassager;
         this.dateArrivee = dateArrivee;
+        this.nomHotel = nomHotel; // Initialisation du nom de l'hôtel
     }
 
     // Getters et Setters
@@ -41,7 +42,12 @@ public class Reservation {
     public String getIdClient() {
         return idClient;
     }
-
+    public String getNomHotel() {
+        return nomHotel;
+    }
+    public void setNomHotel(String nomHotel) {
+        this.nomHotel = nomHotel;
+    }
     public void setIdClient(String idClient) {
         this.idClient = idClient;
     }
@@ -78,6 +84,7 @@ public class Reservation {
                 ", idHotel=" + idHotel +
                 ", nbPassager=" + nbPassager +
                 ", dateArrivee=" + dateArrivee +
+                ", nomHotel='" + nomHotel + '\'' +
                 '}';
     }
 }
