@@ -7,7 +7,9 @@ import framework.RequestParam;
 import framework.UrlAnnotation;
 
 import dao.ReservationDAO;
+import dao.TokenDAO;
 import model.Reservation;
+import model.Token;
 import dao.HotelDAO; 
 import model.Hotel;
 
@@ -55,25 +57,52 @@ public class ReservationController {
 
     @UrlAnnotation(url = "/api/reservations", method = "GET")
     @JsonAnnotation
-    public List<Reservation> getReservationsAsJson(@RequestParam("date") String date) {
-        // Utilisation de l'attribut de classe au lieu de reinstancier
+    public ModelView getReservationsAsJson(
+            @RequestParam("date") String date,
+            @RequestParam("token") String tokenValue
+    ) {
+        TokenDAO tokenDAO = new TokenDAO();
+        List<Token> tokens = tokenDAO.getAllTokens();
+        
+        Token validToken = null;
+        for (Token t : tokens) {
+            if (t.getToken().equals(tokenValue) && !t.isExpired()) {
+                validToken = t;
+                break;
+            }
+        }
+        
+        if (validToken == null) {
+            ModelView mv = new ModelView("error.jsp");
+            mv.addObject("error", "Token invalide ou expiré");
+            mv.addObject("status", 401);
+            return mv;
+        }
+        
         List<Reservation> reservations = reservationDAO.getAllReservations();
 
         if (date == null || date.isEmpty()) {
-            return reservations;
+            ModelView mv = new ModelView("jsonView.jsp");
+            mv.addObject("data", reservations);
+            return mv;
         } else {
             List<Reservation> filteredReservations = new ArrayList<>();
             try {
                 LocalDate filterDate = LocalDate.parse(date);
                 for (Reservation r : reservations) {
-                    if (r.getDateArrivee().toLocalDate().equals(filterDate)) { 
+                    if (r.getDateArrivee().toLocalDate().equals(filterDate)) {
                         filteredReservations.add(r);
-                    }
                 }
-                return filteredReservations;
-            } catch (DateTimeParseException e) {
-                return new ArrayList<>();
             }
+            ModelView mv = new ModelView("jsonView.jsp");
+            mv.addObject("data", filteredReservations);
+            return mv;
+        } catch (DateTimeParseException e) {
+            ModelView mv = new ModelView("error.jsp");
+            mv.addObject("error", "Format de date invalide");
+            mv.addObject("status", 400);
+            return mv;
         }
     }
+}
 }
