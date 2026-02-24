@@ -1,7 +1,7 @@
     -- Supprimer la base si elle existe
     DROP DATABASE IF EXISTS tourOperateur;
 
-    -- Créer la base
+    -- Creer la base
     CREATE DATABASE tourOperateur;
 
     -- Se connecter à la base (dans psql)
@@ -13,7 +13,7 @@
         nom VARCHAR(255)
     );
 
-    -- Table des réservations
+    -- Table des reservations
     CREATE TABLE reservation (
         id SERIAL PRIMARY KEY,
         idclient VARCHAR(10),

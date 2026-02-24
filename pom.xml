@@ -20,7 +20,7 @@
 
     <dependencies>
 
-        <!-- API Servlet (fournie par Tomcat embarqué) -->
+        <!-- API Servlet (fournie par Tomcat embarque) -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -73,7 +73,7 @@
                 <version>3.11.0</version>
             </plugin>
 
-            <!-- Génération du WAR -->
+            <!-- Generation du WAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -95,7 +95,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Télécharger Webapp Runner (Tomcat embarqué) -->
+            <!-- Telecharger Webapp Runner (Tomcat embarque) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

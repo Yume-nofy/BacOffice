@@ -9,7 +9,7 @@ public class Reservation {
     private int idHotel;
     private int nbPassager;
     private LocalDateTime dateArrivee;
-    private String nomHotel; // Ajouté pour stocker le nom de l'hôtel
+    private String nomHotel; // Ajoute pour stocker le nom de l'hôtel
     // Constructeurs
     public Reservation() {
     }

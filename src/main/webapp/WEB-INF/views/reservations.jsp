@@ -2,7 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
-    <title>Gestion des Réservations</title>
+    <title>Gestion des Reservations</title>
     <style>
         body { font-family: sans-serif; background-color: #f4f4f4; }
         table { border-collapse: collapse; width: 90%; margin: 20px auto; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -20,7 +20,7 @@
 <body>
 
 <div class="container">
-    <h2>Liste des Réservations</h2>
+    <h2>Liste des Reservations</h2>
 </div>
 
 <table>
@@ -30,7 +30,7 @@
             <th>ID Client </th>
             <th>ID Hôtel</th>
             <th>Nombre de Passagers</th>
-            <th>Date d'Arrivée</th>
+            <th>Date d'Arrivee</th>
         </tr>
     </thead>
     <tbody>
@@ -45,7 +45,7 @@
         </c:forEach>
         <c:if test="${empty reservations}">
             <tr>
-                <td colspan="5">Aucune réservation trouvée.</td>
+                <td colspan="5">Aucune reservation trouvee.</td>
             </tr>
         </c:if>
     </tbody>
@@ -54,14 +54,14 @@
 <hr style="width: 80%; margin: 40px auto;">
 
 <div class="container">
-    <h3>Ajouter une nouvelle Réservation</h3>
+    <h3>Ajouter une nouvelle Reservation</h3>
 </div>
 
 <form action="${pageContext.request.contextPath}/reservation/add" method="post">
     <label>ID Client (String):</label>
     <input type="text" name="idClient" placeholder="Ex: FB-12345" required />
 
-    <label>Sélectionner l'Hôtel:</label>
+    <label>Selectionner l'Hôtel:</label>
     <select name="idHotel" required>
         <option value="">-- Choisir un hôtel --</option>
         <c:forEach var="h" items="${hotels}">
@@ -72,10 +72,10 @@
     <label>Nombre de Passagers:</label>
     <input type="number" name="nbPassager" min="1" required />
 
-    <label>Date d'Arrivée:</label>
+    <label>Date d'Arrivee:</label>
     <input type="datetime-local" name="dateArrivee" required />
 
-    <input type="submit" value="Enregistrer la réservation" />
+    <input type="submit" value="Enregistrer la reservation" />
 </form>
 
 </body>

@@ -7,7 +7,7 @@ import framework.UrlAnnotation;
 public class Hello {
 
     @UrlAnnotation(url = "/hello", method="GET")
-    public String Hello() {
+    public String test() {
         return "hello world";
     }
 }
