@@ -4,13 +4,12 @@ import model.Reservation;
 import util.DBConnection;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationDAO {
 
-    // Ajouter une réservation
+    // Ajouter une reservation
     public void addReservation(Reservation reservation) {
         String sql = "INSERT INTO reservation (idclient, idhotel, nb_passager, date_arrivee) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
@@ -34,7 +33,7 @@ public class ReservationDAO {
         }
     }
 
-    // Lister toutes les réservations
+    // Lister toutes les reservations
     public List<Reservation> getAllReservations() {
         List<Reservation> reservations = new ArrayList<>();
         String sql = "SELECT * FROM reservation r join  hotel h on h.id=r.idhotel";
@@ -62,7 +61,7 @@ public class ReservationDAO {
         return reservations;
     }
 
-    // Chercher une réservation par id
+    // Chercher une reservation par id
     public Reservation getReservationById(int id) {
         String sql = "CT * FROM reservation r join  hotel h on h.id=r.idhotel WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -89,7 +88,7 @@ public class ReservationDAO {
         return null;
     }
 
-    // Mettre à jour une réservation
+    // Mettre à jour une reservation
     public void updateReservation(Reservation reservation) {
         String sql = "UPDATE reservation SET idclient=?, idhotel=?, nb_passager=?, date_arrivee=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
@@ -108,7 +107,7 @@ public class ReservationDAO {
         }
     }
 
-    // Supprimer une réservation
+    // Supprimer une reservation
     public void deleteReservation(int id) {
         String sql = "DELETE FROM reservation WHERE id=?";
         try (Connection conn = DBConnection.getConnection();

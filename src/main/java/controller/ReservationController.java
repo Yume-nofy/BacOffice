@@ -13,8 +13,8 @@ import model.Hotel;
 
 import java.time.format.DateTimeParseException;
 import java.time.LocalDateTime;
-import java.time.LocalDate; // Ajouté
-import java.util.ArrayList;   // Ajouté
+import java.time.LocalDate; // Ajoute
+import java.util.ArrayList;   // Ajoute
 import java.util.List;
 
 @ControllerAnnotation
@@ -56,7 +56,7 @@ public class ReservationController {
     @UrlAnnotation(url = "/api/reservations", method = "GET")
     @JsonAnnotation
     public List<Reservation> getReservationsAsJson(@RequestParam("date") String date) {
-        // Utilisation de l'attribut de classe au lieu de réinstancier
+        // Utilisation de l'attribut de classe au lieu de reinstancier
         List<Reservation> reservations = reservationDAO.getAllReservations();
 
         if (date == null || date.isEmpty()) {
@@ -73,7 +73,7 @@ public class ReservationController {
                 }
                 return filteredReservations;
             } catch (DateTimeParseException e) {
-                return List.of();
+                return new ArrayList<>();
             }
         }
     }
