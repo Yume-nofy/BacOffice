@@ -66,14 +66,13 @@ public class ReservationController {
             try {
                 LocalDate filterDate = LocalDate.parse(date);
                 for (Reservation r : reservations) {
-                    // Extraction de la date (LocalDate) depuis le LocalDateTime pour comparer
                     if (r.getDateArrivee().toLocalDate().equals(filterDate)) { 
                         filteredReservations.add(r);
                     }
                 }
                 return filteredReservations;
             } catch (DateTimeParseException e) {
-                return List.of();
+                return new ArrayList<>();
             }
         }
     }
