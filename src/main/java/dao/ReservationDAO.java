@@ -36,7 +36,7 @@ public class ReservationDAO {
     // Lister toutes les reservations
     public List<Reservation> getAllReservations() {
         List<Reservation> reservations = new ArrayList<>();
-        String sql = "SELECT * FROM reservation r join  hotel h on h.id=r.idhotel";
+        String sql = "SELECT * FROM reservation r join  lieu h on h.id=r.idhotel";
 
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement();
@@ -63,7 +63,7 @@ public class ReservationDAO {
 
     // Chercher une reservation par id
     public Reservation getReservationById(int id) {
-        String sql = "CT * FROM reservation r join  hotel h on h.id=r.idhotel WHERE id = ?";
+        String sql = "CT * FROM reservation r join  lieu h on h.id=r.idhotel WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
