@@ -1,10 +1,15 @@
 package model;
 
+import java.util.List;
+
 public class Vehicule {
     private int id;
     private String reference;
     private String typeCarburant; // D: Diesel, Es: Essence, El: Electrique
     private int nbrPlace;
+    private boolean isOccuped;
+
+    private List<Reservation> reservationsAssign;
     
     public Vehicule() {}
     
@@ -70,5 +75,21 @@ public class Vehicule {
                 ", typeCarburant='" + typeCarburant + '\'' +
                 ", nbrPlace=" + nbrPlace +
                 '}';
+    }
+
+    public List<Reservation> getReservationsAssign() {
+        return reservationsAssign;
+    }
+
+    public void setReservationsAssign(List<Reservation> reservationsAssign) {
+        this.reservationsAssign = reservationsAssign;
+    }
+
+    public void setIsOccuped(boolean isOccuped) {
+        this.isOccuped = isOccuped;
+    }
+
+    public boolean IsOccuped() {
+        return isOccuped;
     }
 }
