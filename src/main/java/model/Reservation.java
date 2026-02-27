@@ -27,7 +27,7 @@ public class Reservation {
         this.idHotel = idHotel;
         this.nbPassager = nbPassager;
         this.dateArrivee = dateArrivee;
-        this.nomHotel = nomHotel; // Initialisation du nom de l'hôtel
+        this.nomHotel = nomHotel; 
     }
 
     // Getters et Setters

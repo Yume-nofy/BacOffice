@@ -8,15 +8,16 @@ import framework.UrlAnnotation;
 
 import dao.ReservationDAO;
 import dao.TokenDAO;
-import model.Reservation;
-import model.Token;
-import dao.HotelDAO; 
-import model.Hotel;
+import dao.VehiculeDAO;
+import dao.HotelDAO;
+import dao.ParamDAO;
+import model.*;
+import service.ReservationService;
 
 import java.time.format.DateTimeParseException;
 import java.time.LocalDateTime;
-import java.time.LocalDate; // Ajoute
-import java.util.ArrayList;   // Ajoute
+import java.time.LocalDate; 
+import java.util.ArrayList;   
 import java.util.List;
 
 @ControllerAnnotation
@@ -53,6 +54,33 @@ public class ReservationController {
         mv.addObject("reservations", reservations);
         mv.addObject("hotels", hotels); 
         return mv;
+    }
+
+    @UrlAnnotation(url = "/api/assignationVehicule", method= "GET")
+    @JsonAnnotation
+    public ModelView getAssignationVehicule( @RequestParam("dateDebut") String dateDebut,@RequestParam("dateFin") String dateFin) {
+        
+
+        LocalDate dateDebutParse = null;
+        LocalDate dateFinParse = null;
+
+        if (dateDebut!=null && !dateDebut.isEmpty()) {
+            dateDebutParse= LocalDate.parse(dateDebut);
+        }
+
+        if (dateFin!=null && !dateFin.isEmpty()) {
+            dateFinParse= LocalDate.parse(dateFin);
+        }
+
+        List<Reservation> reservations = reservationDAO.getReservationsByDate(dateDebutParse, dateFinParse);
+        ParamDAO pDAO = new ParamDAO();
+        Param p = pDAO.getParam();
+
+        VehiculeDAO vDAO = new VehiculeDAO();
+        List<Vehicule> vehicules = vDAO.getAllVehicules();
+        ReservationService rs = new ReservationService();
+
+        return rs.assignerVehicule(dateDebutParse, dateFinParse, reservations, vehicules, p);
     }
 
     @UrlAnnotation(url = "/api/reservations", method = "GET")

@@ -33,7 +33,15 @@ public class VehiculeDAO {
     
     public List<Vehicule> getAllVehicules() {
         List<Vehicule> vehicules = new ArrayList<>();
-        String sql = "SELECT * FROM vehicule ORDER BY id";
+        String sql = "SELECT * FROM vehicule\r\n" + //
+                        "ORDER BY \r\n" + //
+                        "    nbr_place DESC,\r\n" + //
+                        "    CASE type_carburant\r\n" + //
+                        "        WHEN 'D' THEN 1\r\n" + //
+                        "        WHEN 'Es' THEN 2\r\n" + //
+                        "        WHEN 'El' THEN 3\r\n" + //
+                        "        ELSE 4\r\n" + //
+                        "    END ASC";
         
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement();
