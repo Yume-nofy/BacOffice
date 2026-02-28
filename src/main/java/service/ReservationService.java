@@ -21,12 +21,14 @@ public class ReservationService {
 
         LocalDateTime tempsReservation1 = reservations.get(0).getDateArrivee();
         List<Reservation> rv = new ArrayList<>();
+        Reservation avant = reservations.get(0);
         
         for (int i = 0; i < reservations.size(); i++) {
             Reservation reservation = reservations.get(i);
             
-            if (i < reservations.size() - 1 && tempsReservation1.plusMinutes(p.getTemps_attente()).compareTo(reservations.get(i+1).getDateArrivee()) >= 0) {
+            if (i < reservations.size() - 1 && tempsReservation1.plusMinutes(p.getTemps_attente()).compareTo(reservations.get(i+1).getDateArrivee()) >= 0 && avant.getIdHotel()==reservation.getIdHotel()) {
                 rv.add(reservation);
+                avant=reservation;
             } else {
                 rv.add(reservation);
                 group.put("group" + i, new ArrayList<>(rv));
