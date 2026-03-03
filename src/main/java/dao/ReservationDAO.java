@@ -51,7 +51,7 @@ public class ReservationDAO {
                         rs.getInt("idhotel"),
                         rs.getInt("nb_passager"),
                         rs.getTimestamp("date_arrivee").toLocalDateTime(),
-                        rs.getString("nom")
+                        rs.getString("libelle")
                 );
                 reservations.add(r);
             }
@@ -114,7 +114,7 @@ public class ReservationDAO {
                             rs.getInt("idhotel"),
                             rs.getInt("nb_passager"),
                             rs.getTimestamp("date_arrivee").toLocalDateTime(),
-                            rs.getString("nom")
+                            rs.getString("libelle")
                     );
                 }
             }
