@@ -35,7 +35,7 @@ public class VehiculeDAO {
         List<Vehicule> vehicules = new ArrayList<>();
         String sql = "SELECT * FROM vehicule\r\n" + //
                         "ORDER BY \r\n" + //
-                        "    nbr_place DESC,\r\n" + //
+                        "    nbr_place ASC,\r\n" + //
                         "    CASE type_carburant\r\n" + //
                         "        WHEN 'D' THEN 1\r\n" + //
                         "        WHEN 'Es' THEN 2\r\n" + //
