@@ -1,6 +1,7 @@
 package model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Vehicule {
     private int id;
@@ -17,6 +18,7 @@ public class Vehicule {
         this.reference = reference;
         this.typeCarburant = typeCarburant;
         this.nbrPlace = nbrPlace;
+        this.reservationsAssign= new ArrayList<>();
     }
     
     public Vehicule(int id, String reference, String typeCarburant, int nbrPlace) {
@@ -24,6 +26,7 @@ public class Vehicule {
         this.reference = reference;
         this.typeCarburant = typeCarburant;
         this.nbrPlace = nbrPlace;
+        this.reservationsAssign= new ArrayList<>();
     }
     
     public int getId() {
@@ -91,5 +94,13 @@ public class Vehicule {
 
     public boolean IsOccuped() {
         return isOccuped;
+    }
+
+    public int getNbrPlaceDisponible() {
+        int c = 0;
+        for (Reservation reservation : reservationsAssign) {
+            c= reservation.getNbPassager();
+        }
+        return this.nbrPlace-c;
     }
 }
