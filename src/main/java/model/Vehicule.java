@@ -99,7 +99,7 @@ public class Vehicule {
     public int getNbrPlaceDisponible() {
         int c = 0;
         for (Reservation reservation : reservationsAssign) {
-            c= reservation.getNbPassager();
+            c += reservation.getNbPassager();
         }
         return this.nbrPlace-c;
     }

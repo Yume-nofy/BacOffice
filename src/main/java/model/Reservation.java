@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class Reservation {
 
@@ -87,5 +88,11 @@ public class Reservation {
                 ", nomHotel='" + nomHotel + '\'' +
                 '}';
     }
-
+    public boolean memeReservation(Reservation r){
+        if(r==null){
+            return false;
+        }
+        return this.dateArrivee.truncatedTo(ChronoUnit.MINUTES)
+        .equals(r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES));
+    }
 }
