@@ -1,5 +1,9 @@
 package model;
 
+import java.math.BigDecimal;
+import java.util.List;
+import dao.DistanceDAO;
+
 public class Lieu {
     private int id;
     private String libelle;
@@ -40,6 +44,19 @@ public class Lieu {
     
     public void setCode(String code) {
         this.code = code;
+    }
+    
+    public Double calculeDistance(Lieu autreLieu) {
+        DistanceDAO distanceDAO = new DistanceDAO();
+        Distance distance = distanceDAO.getDistanceBetween(this.id, autreLieu.getId());
+        
+        if (distance != null) {
+            BigDecimal kilometer = distance.getKilometer();
+            if (kilometer != null) {
+                return kilometer.doubleValue();
+            }
+        }
+        return 0.0;
     }
     
     @Override
