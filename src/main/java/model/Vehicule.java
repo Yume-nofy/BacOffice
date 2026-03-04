@@ -244,7 +244,7 @@ public class Vehicule {
             return defaultDate;
         }
         
-        // Récupérer la première réservation pour la date de départ
+        reservationsAssign.sort((r1, r2) -> r1.getDateArrivee().compareTo(r2.getDateArrivee()));
         LocalDateTime dateDepart = reservationsAssign.get(0).getDateArrivee();
         
         // Récupérer la distance DIRECTE entre l'aéroport et le dernier lieu (pas la somme)

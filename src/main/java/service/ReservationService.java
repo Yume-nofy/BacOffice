@@ -57,6 +57,9 @@ public class ReservationService {
         
         vehicules.removeIf(v -> v.getReservationsAssign() == null || v.getReservationsAssign().isEmpty());
         
+        for(Vehicule v : vehicules){
+            v.getdateretourAssign();            
+        }
         ModelView mv = new ModelView("jsonView.jsp");
         mv.addObject("vehicules", vehicules);
         mv.addObject("reservationsSansVehicule", reservationsSansVehicule);
