@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Collections;
 
 public class Reservation {
 
@@ -102,7 +103,9 @@ public class Reservation {
     List<Vehicule> meilleurChoix = new ArrayList<>();
         for(Vehicule v : vehicules){
             if(v.getNbrPlaceDisponible()>=this.nbPassager){
-                
+                    if(v.getReservationsAssign()==null||v.getReservationsAssign().isEmpty()||v.getReservationsAssign().get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES).equals(this.dateArrivee.truncatedTo(ChronoUnit.MINUTES)))
+                    {
+                        
                     if(meilleurChoix==null||meilleurChoix.isEmpty()){
                         meilleurChoix.add(v);
                     }
@@ -111,15 +114,23 @@ public class Reservation {
                         meilleurChoix.add(v);
                     }
                     else if(v.getNbrPlaceDisponible()==meilleurChoix.get(0).getNbrPlaceDisponible()){
+                        System.out.println("v carburant: " + v.getTypeCarburant());
                         if(getPrioriteCarburant(v.getTypeCarburant())<getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
                             meilleurChoix.clear();
+                        System.out.println("fakooo");
+
                             meilleurChoix.add(v);
                         }
                         else if(getPrioriteCarburant(v.getTypeCarburant())==getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
                             meilleurChoix.add(v);
+                            System.out.println("fakooo");
+                            
                         }
-                    }
-                };
+                    }    
+
+                    }   
+                    
+                }
                 
             
         }
@@ -127,10 +138,14 @@ public class Reservation {
         return null;
     }
     else if(meilleurChoix.size()==1){
+        
         return meilleurChoix.get(0);
+
     }
     else{
-        return randomVehicule(meilleurChoix);
+        System.out.println("mety");
+        Collections.shuffle(meilleurChoix);
+return meilleurChoix.get(0);
     }
  }
     private int getPrioriteCarburant(String type) {
