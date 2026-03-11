@@ -102,28 +102,39 @@ public class Reservation {
     public Vehicule getVehiculeApproprie(List<Vehicule>vehicules){
     List<Vehicule> meilleurChoix = new ArrayList<>();
         for(Vehicule v : vehicules){
+            
+            boolean AssignExiste = false;
+            if(v.getReservationsAssign() != null && !v.getReservationsAssign().isEmpty()){
+                AssignExiste=true;
+            }
+    
             if(v.getNbrPlaceDisponible()>=this.nbPassager){
+        
+
                     if(v.getReservationsAssign()==null||v.getReservationsAssign().isEmpty()||v.getReservationsAssign().get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES).equals(this.dateArrivee.truncatedTo(ChronoUnit.MINUTES)))
                     {
-                        
                     if(meilleurChoix==null||meilleurChoix.isEmpty()){
                         meilleurChoix.add(v);
+                                    
                     }
-                    else if(v.getNbrPlaceDisponible()<meilleurChoix.get(0).getNbrPlaceDisponible()){
+                    else if(v.getNbrPlaceDisponible()<meilleurChoix.get(0).getNbrPlaceDisponible()&&AssignExiste){
                         meilleurChoix.clear();
                         meilleurChoix.add(v);
+                                    
+
+                    
                     }
                     else if(v.getNbrPlaceDisponible()==meilleurChoix.get(0).getNbrPlaceDisponible()){
-                        System.out.println("v carburant: " + v.getTypeCarburant());
+                        
                         if(getPrioriteCarburant(v.getTypeCarburant())<getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
                             meilleurChoix.clear();
-                        System.out.println("fakooo");
+                        
 
                             meilleurChoix.add(v);
                         }
                         else if(getPrioriteCarburant(v.getTypeCarburant())==getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
                             meilleurChoix.add(v);
-                            System.out.println("fakooo");
+                           
                             
                         }
                     }    

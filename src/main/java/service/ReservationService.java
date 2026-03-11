@@ -13,17 +13,22 @@ public ModelView assignerVehicule(LocalDate dateDebut, LocalDate dateFin, List<R
     List<Reservation> reservationsSansVehicule = new ArrayList<>(reservations);
     List<Reservation> reservationsAssignees = new ArrayList<>();
 
-    // 1. Trier les réservations par ID (ancienneté)
-    reservations.sort(Comparator.comparingInt(Reservation::getId));
+    
+    reservations.sort(
+    Comparator.comparing(Reservation::getDateArrivee)
+              .thenComparing(Reservation::getNbPassager, Comparator.reverseOrder())
+);
 
-    // 2. Grouper par date d'arrivée (tronquée à la minute)
+   
     Map<LocalDateTime, List<Reservation>> groupes = new TreeMap<>();
     for (Reservation r : reservations) {
         LocalDateTime cle = r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES);
         groupes.computeIfAbsent(cle, k -> new ArrayList<>()).add(r);
     }
-
-    // 3. Attribution des véhicules
+for (List<Reservation> listeDuGroupe : groupes.values()) {
+        listeDuGroupe.sort((r1, r2) -> Integer.compare(r2.getNbPassager(), r1.getNbPassager()));
+    }
+    
     for (List<Reservation> groupe : groupes.values()) {
 
     for (Reservation r : groupe) {
@@ -40,8 +45,8 @@ public ModelView assignerVehicule(LocalDate dateDebut, LocalDate dateFin, List<R
             vehiculeChoisi.getReservationsAssign().add(r);
             reservationsAssignees.add(r);
 
-            System.out.println("Vehicule choisi: " + vehiculeChoisi.getReference() +
-                               " pour reservation #" + r.getId());
+            // System.out.println("Vehicule choisi: " + vehiculeChoisi.getReference() +
+            //                    " pour reservation #" + r.getId());
         }
     }
 
