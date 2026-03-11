@@ -2,6 +2,9 @@ package model;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Reservation {
 
@@ -95,4 +98,59 @@ public class Reservation {
         return this.dateArrivee.truncatedTo(ChronoUnit.MINUTES)
         .equals(r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES));
     }
+    public Vehicule getVehiculeApproprie(List<Vehicule>vehicules){
+    List<Vehicule> meilleurChoix = new ArrayList<>();
+        for(Vehicule v : vehicules){
+            if(v.getNbrPlaceDisponible()>=this.nbPassager){
+                
+                    if(meilleurChoix==null||meilleurChoix.isEmpty()){
+                        meilleurChoix.add(v);
+                    }
+                    else if(v.getNbrPlaceDisponible()<meilleurChoix.get(0).getNbrPlaceDisponible()){
+                        meilleurChoix.clear();
+                        meilleurChoix.add(v);
+                    }
+                    else if(v.getNbrPlaceDisponible()==meilleurChoix.get(0).getNbrPlaceDisponible()){
+                        if(getPrioriteCarburant(v.getTypeCarburant())<getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
+                            meilleurChoix.clear();
+                            meilleurChoix.add(v);
+                        }
+                        else if(getPrioriteCarburant(v.getTypeCarburant())==getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
+                            meilleurChoix.add(v);
+                        }
+                    }
+                };
+                
+            
+        }
+    if(meilleurChoix.isEmpty()){
+        return null;
+    }
+    else if(meilleurChoix.size()==1){
+        return meilleurChoix.get(0);
+    }
+    else{
+        return randomVehicule(meilleurChoix);
+    }
+ }
+    private int getPrioriteCarburant(String type) {
+    if (type == null) return 4;
+    switch (type) {
+        case "D": return 1;  // Diesel (Priorité 1)
+        case "Es": return 2; // Essence
+        case "El": return 3; // Electrique
+        default: return 4;
+    }
+
+}
+private Vehicule randomVehicule(List<Vehicule> vehicules) {
+    if (vehicules == null || vehicules.isEmpty()) {
+        return null;
+    }
+
+    Random rand = new Random();
+    int index = rand.nextInt(vehicules.size());
+
+    return vehicules.get(index);
+}
 }
