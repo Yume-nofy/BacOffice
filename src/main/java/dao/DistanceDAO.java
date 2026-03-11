@@ -94,14 +94,14 @@ public class DistanceDAO {
     
     public Distance getDistanceBetween(int idFrom, int idTo) {
         String sql = "SELECT * FROM distance WHERE (from_lieu_id = ? AND to_lieu_id = ?) or (to_lieu_id = ? AND from_lieu_id = ?)";
-        
+    
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setInt(1, idFrom);
             ps.setInt(2, idTo);
-            ps.setInt(3, idTo);
-            ps.setInt(4, idFrom);
+            ps.setInt(3, idFrom);
+            ps.setInt(4, idTo);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Lieu fromLieu = lieuDAO.getLieuById(idFrom);

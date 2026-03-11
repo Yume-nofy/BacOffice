@@ -19,6 +19,7 @@ public class Vehicule {
     private List<Reservation> reservationsAssign;
     private List<Lieu> lieux;
     private Double distanceTotal;
+    private List<LocalDateTime> retourListDate;
     private LocalDateTime dateRetour;
     
     public Vehicule() {}
@@ -30,7 +31,7 @@ public class Vehicule {
         this.reservationsAssign= new ArrayList<>();
         this.lieux = new ArrayList<>();
         this.distanceTotal = 0.0;
-        this.dateRetour = null;
+        this.retourListDate = new ArrayList<>();
     }
     
     public Vehicule(int id, String reference, String typeCarburant, int nbrPlace) {
@@ -41,7 +42,7 @@ public class Vehicule {
         this.reservationsAssign= new ArrayList<>();
         this.lieux = new ArrayList<>();
         this.distanceTotal = 0.0;
-        this.dateRetour = null;
+        this.retourListDate = new ArrayList<>();
     }
     
     public int getId() {
@@ -138,29 +139,33 @@ public class Vehicule {
     public LocalDateTime getDateRetour() {
         return dateRetour;
     }
-    
+
+    public List<LocalDateTime> getRetourListDate() {
+        return retourListDate;
+    }
+
     public void setDateRetour(LocalDateTime dateRetour) {
         this.dateRetour = dateRetour;
     }
-    
+
+    public void setRetourListDate(List<LocalDateTime> retourListDate) {
+        this.retourListDate = retourListDate;
+    }
+
     public LocalDateTime getdateretourAssign() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss");
         LocalDateTime defaultDate = LocalDateTime.parse("11/11/11 11:11:11", formatter);
         
-        // Vérifier que toutes les réservations sont assignées
         if (reservationsAssign == null || reservationsAssign.isEmpty()) {
             return defaultDate;
         }
         
-        // Récupérer les paramètres (vitesse moyenne)
         ParamDAO paramDAO = new ParamDAO();
         Param param = paramDAO.getParam();
-        double vitesseMoyenne = param.getVitesse_moyenne(); // km/h
+        double vitesseMoyenne = param.getVitesse_moyenne();
         
-        // L'aéroport a toujours l'ID 1
         int idAeroport = 1;
         
-        // Récupérer les lieux
         LieuDAO lieuDAO = new LieuDAO();
         Lieu aeroportLieu = lieuDAO.getLieuById(idAeroport);
         
@@ -168,22 +173,17 @@ public class Vehicule {
             return defaultDate;
         }
         
-        // Initialiser les listes
         List<Lieu> lieusList = new ArrayList<>();
         Double distanceTotalValue = 0.0;
         
-        // Créer une liste temporaire de lieux UNIQUES à partir des réservations
-        // Éviter les doublons : même lieu et même date
         List<Lieu> lieuDisponibles = new ArrayList<>();
         Set<String> lieuDateSet = new java.util.HashSet<>();
         
-        for (Reservation reservation : reservationsAssign) {
+        for (Reservation reservation : this.reservationsAssign) {
             Lieu hotelLieu = lieuDAO.getLieuById(reservation.getIdHotel());
             if (hotelLieu != null) {
-                // Créer une clé unique pour chaque lieu + date
                 String cleLieuDate = hotelLieu.getId() + "_" + reservation.getDateArrivee().toLocalDate();
                 
-                // Ajouter seulement si c'est la première fois qu'on voit ce lieu avec cette date
                 if (!lieuDateSet.contains(cleLieuDate)) {
                     lieuDisponibles.add(hotelLieu);
                     lieuDateSet.add(cleLieuDate);
@@ -195,29 +195,25 @@ public class Vehicule {
             return defaultDate;
         }
         
-        // Parcourir les lieux : partir de l'aéroport et aller au lieu le plus proche
         Lieu lieuActuel = aeroportLieu;
         Lieu dernierLieu = null;
-        
+        Double distanceDirect =0.0;
+        List<LocalDateTime> datRet = new ArrayList<>();
+        LocalDateTime dateActuel=  this.reservationsAssign.get(0).getDateArrivee();
         while (!lieuDisponibles.isEmpty()) {
             Lieu lieuPlusProche = null;
             Double distanceMinimale = Double.MAX_VALUE;
-            
-            // Trouver le lieu le plus proche du lieu actuel
             for (Lieu lieu : lieuDisponibles) {
                 if(lieu.getId() == lieuActuel.getId()) {
-                    continue; // Ignorer le lieu actuel
+                    continue; 
                 }
-                Double distance = lieuActuel.calculeDistance(lieu);
                 
+                Double distance = lieuActuel.calculeDistance(lieu);
                 if (distance != null && distance > 0) {
-                    // Si la distance est plus petite
                     if (distance < distanceMinimale) {
                         distanceMinimale = distance;
                         lieuPlusProche = lieu;
-                    }
-                    // Si la distance est égale, comparer alphabétiquement les noms des lieux
-                    else if (distance.equals(distanceMinimale) && lieuPlusProche != null) {
+                    } else if (distance.equals(distanceMinimale) && lieuPlusProche != null) {
                         if (lieu.getLibelle().compareTo(lieuPlusProche.getLibelle()) < 0) {
                             lieuPlusProche = lieu;
                         }
@@ -228,15 +224,17 @@ public class Vehicule {
             if (lieuPlusProche == null || distanceMinimale == Double.MAX_VALUE) {
                 break;
             }
-            
-            // Ajouter le lieu à la liste
+            double tmpT = (distanceMinimale/vitesseMoyenne)*60;
+            System.out.println("date actuel : "+ dateActuel);
+            System.out.println("minute trajet : "+tmpT);
+            dateActuel= dateActuel.plusMinutes((long)tmpT);
+            datRet.add(dateActuel);
             lieusList.add(lieuPlusProche);
+            distanceDirect += lieuActuel.calculeDistance(lieuPlusProche);
             dernierLieu = lieuPlusProche;
             
-            // Enlever le lieu de la liste des disponibles
             lieuDisponibles.remove(lieuPlusProche);
             
-            // Le lieu actuel devient le lieu le plus proche pour la prochaine itération
             lieuActuel = lieuPlusProche;
         }
         
@@ -247,22 +245,18 @@ public class Vehicule {
         reservationsAssign.sort((r1, r2) -> r1.getDateArrivee().compareTo(r2.getDateArrivee()));
         LocalDateTime dateDepart = reservationsAssign.get(0).getDateArrivee();
         
-        // Récupérer la distance DIRECTE entre l'aéroport et le dernier lieu (pas la somme)
-        Double distanceDirect = aeroportLieu.calculeDistance(dernierLieu);
+        distanceDirect += aeroportLieu.calculeDistance(dernierLieu);
         distanceTotalValue = (distanceDirect != null && distanceDirect > 0) ? distanceDirect : 0.0;
+        System.out.println("distanceTotalValue :"+distanceTotalValue);
+        double tempsTrajet = (distanceTotalValue / vitesseMoyenne) * 60; 
         
-        // Calculer le temps de trajet en minutes
-        double tempsTrajet = (distanceTotalValue / vitesseMoyenne) * 60; // conversion en minutes
+        long totalTemps = (long) tempsTrajet; 
         
-        // Ajouter le temps total à la date de départ SANS ajouter le temps d'attente
-        long totalTemps = (long) tempsTrajet; // en minutes
-        
-        // Calculer la date de retour
         LocalDateTime dateRetourValue = dateDepart.plusMinutes(totalTemps);
         
-        // Setter les attributs via les setters
         setLieux(lieusList);
         setDistanceTotal(distanceTotalValue);
+        setRetourListDate(datRet);
         setDateRetour(dateRetourValue);
         
         return dateRetourValue;
