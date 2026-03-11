@@ -91,4 +91,35 @@ public class DistanceDAO {
         
         return distances;
     }
+    
+    public Distance getDistanceBetween(int idFrom, int idTo) {
+        String sql = "SELECT * FROM distance WHERE (from_lieu_id = ? AND to_lieu_id = ?) or (to_lieu_id = ? AND from_lieu_id = ?)";
+    
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, idFrom);
+            ps.setInt(2, idTo);
+            ps.setInt(3, idFrom);
+            ps.setInt(4, idTo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Lieu fromLieu = lieuDAO.getLieuById(idFrom);
+                    Lieu toLieu = lieuDAO.getLieuById(idTo);
+                    
+                    return new Distance(
+                            rs.getInt("id"),
+                            fromLieu,
+                            toLieu,
+                            rs.getBigDecimal("kilometer")
+                    );
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
 }

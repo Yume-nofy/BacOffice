@@ -1,6 +1,11 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Collections;
 
 public class Reservation {
 
@@ -87,5 +92,91 @@ public class Reservation {
                 ", nomHotel='" + nomHotel + '\'' +
                 '}';
     }
+    public boolean memeReservation(Reservation r){
+        if(r==null){
+            return false;
+        }
+        return this.dateArrivee.truncatedTo(ChronoUnit.MINUTES)
+        .equals(r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES));
+    }
+    public Vehicule getVehiculeApproprie(List<Vehicule>vehicules){
+    List<Vehicule> meilleurChoix = new ArrayList<>();
+        for(Vehicule v : vehicules){
+            
+            boolean AssignExiste = false;
+            if(v.getReservationsAssign() != null && !v.getReservationsAssign().isEmpty()){
+                AssignExiste=true;
+            }
+    
+            if(v.getNbrPlaceDisponible()>=this.nbPassager){
+        
 
+                    if(v.getReservationsAssign()==null||v.getReservationsAssign().isEmpty()||v.getReservationsAssign().get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES).equals(this.dateArrivee.truncatedTo(ChronoUnit.MINUTES)))
+                    {
+                    if(meilleurChoix==null||meilleurChoix.isEmpty()){
+                        meilleurChoix.add(v);
+                                    
+                    }
+                    else if(v.getNbrPlaceDisponible()<meilleurChoix.get(0).getNbrPlaceDisponible()&&AssignExiste){
+                        meilleurChoix.clear();
+                        meilleurChoix.add(v);
+                                    
+
+                    
+                    }
+                    else if(v.getNbrPlaceDisponible()==meilleurChoix.get(0).getNbrPlaceDisponible()){
+                        
+                        if(getPrioriteCarburant(v.getTypeCarburant())<getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
+                            meilleurChoix.clear();
+                        
+
+                            meilleurChoix.add(v);
+                        }
+                        else if(getPrioriteCarburant(v.getTypeCarburant())==getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
+                            meilleurChoix.add(v);
+                           
+                            
+                        }
+                    }    
+
+                    }   
+                    
+                }
+                
+            
+        }
+    if(meilleurChoix.isEmpty()){
+        return null;
+    }
+    else if(meilleurChoix.size()==1){
+        
+        return meilleurChoix.get(0);
+
+    }
+    else{
+        System.out.println("mety");
+        Collections.shuffle(meilleurChoix);
+return meilleurChoix.get(0);
+    }
+ }
+    private int getPrioriteCarburant(String type) {
+    if (type == null) return 4;
+    switch (type) {
+        case "D": return 1;  // Diesel (Priorité 1)
+        case "Es": return 2; // Essence
+        case "El": return 3; // Electrique
+        default: return 4;
+    }
+
+}
+private Vehicule randomVehicule(List<Vehicule> vehicules) {
+    if (vehicules == null || vehicules.isEmpty()) {
+        return null;
+    }
+
+    Random rand = new Random();
+    int index = rand.nextInt(vehicules.size());
+
+    return vehicules.get(index);
+}
 }

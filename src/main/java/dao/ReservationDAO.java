@@ -69,7 +69,7 @@ public class ReservationDAO {
                     "FROM reservation r " +
                     "JOIN lieu h ON h.id = r.idhotel " +
                     "WHERE r.date_arrivee BETWEEN ? AND ? " +
-                    "ORDER BY r.idhotel ASC ,r.date_arrivee ASC";
+                    "ORDER BY r.idhotel ASC ,r.date_arrivee ASC, r.nb_passager DESC";
 
         try (Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
