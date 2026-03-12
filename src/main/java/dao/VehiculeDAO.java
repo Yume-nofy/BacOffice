@@ -41,7 +41,7 @@ public class VehiculeDAO {
                         "        WHEN 'Es' THEN 2\r\n" + //
                         "        WHEN 'El' THEN 3\r\n" + //
                         "        ELSE 4\r\n" + //
-                        "    END DESC";
+                        "    END ASC";
         
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement();
