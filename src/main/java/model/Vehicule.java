@@ -11,6 +11,8 @@ import java.time.temporal.ChronoUnit;
 import dao.ParamDAO;
 import dao.LieuDAO;
 import java.time.*;
+import java.util.*;
+
 
 public class Vehicule {
     private int id;
@@ -152,7 +154,20 @@ public class Vehicule {
     }
 
     public void setRetourListDate(List<LocalDateTime> retourListDate) {
-        this.retourListDate = retourListDate;
+        List<LocalDateTime> sortedList = new ArrayList<>();
+        Lieu l1= lieux.get(0);
+        int i=0;
+        for(Lieu l : lieux) {
+            if(l1.getLibelle().compareIgnoreCase(l.getLibelle())==0) {
+                sortedList.add(retourListDate.get(i));
+            }
+            else{
+                sortedList.add(retourListDate.get(i));
+                i++;
+            }
+        }   
+        this.retourListDate = sortedList;
+
     }
 
     public LocalDateTime getdateretourAssign() {
