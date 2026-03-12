@@ -264,12 +264,18 @@ public class Vehicule {
         
         return dateRetourValue;
     }
-    public void remplirReservation(List<Reservation> reservations){
-        for(Reservation r: reservations){
+    public void remplirReservation(List<Reservation> reservations, List<Reservation> reservationsAssignees){
+       for (int i = 0; i < reservations.size(); i++) {
+            Reservation r = reservations.get(i);
             if(this.getNbrPlaceDisponible()>=r.getNbPassager()&&r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES).equals(this.reservationsAssign.get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES))){
                 System.out.println("Ajout de la reservation #" + r.getId() + " avec " + r.getNbPassager() + " passagers à " + r.getDateArrivee() + " dans le véhicule " + this.getReference());
                 this.reservationsAssign.add(r);
+                reservationsAssignees.add(r);
+                i--;
+                System.out.println("delete de reservation : "+r.getId() );
                 
+                reservations.remove(r);
+
             }
         }
     }
