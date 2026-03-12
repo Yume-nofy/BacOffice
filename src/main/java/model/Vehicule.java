@@ -163,8 +163,8 @@ public class Vehicule {
                 sortedList.add(retourListDate.get(i));
             }
             else{
-                sortedList.add(retourListDate.get(i));
                 i++;
+                sortedList.add(retourListDate.get(i));
                 l1=la.getLieuById(r.getIdHotel());
                 System.out.println(" i  ++ ");
             }
