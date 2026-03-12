@@ -1,13 +1,14 @@
 package model;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
+import java.time.temporal.ChronoUnit;
 
 import dao.ParamDAO;
 import dao.LieuDAO;
+import java.time.*;
+import java.util.*;
+
 
 public class Vehicule {
     private int id;
@@ -149,7 +150,26 @@ public class Vehicule {
     }
 
     public void setRetourListDate(List<LocalDateTime> retourListDate) {
-        this.retourListDate = retourListDate;
+        List<LocalDateTime> sortedList = new ArrayList<>();
+        LieuDAO la = new LieuDAO();
+
+        Lieu l1=la.getLieuById(this.reservationsAssign.get(0).getIdHotel());
+        System.out.println("l1 :"+l1.getId());
+        int i=0;
+        for(Reservation r : this.reservationsAssign) {
+            System.out.println("resercvation :"+r.getIdHotel());
+
+            if(l1.getId()==r.getIdHotel()) {
+                sortedList.add(retourListDate.get(i));
+            }
+            else{
+                i++;
+                sortedList.add(retourListDate.get(i));
+                l1=la.getLieuById(r.getIdHotel());
+                System.out.println(" i  ++ ");
+            }
+        }   
+        this.retourListDate = sortedList;
     }
 
     public LocalDateTime getdateretourAssign() {
@@ -261,4 +281,20 @@ public class Vehicule {
         
         return dateRetourValue;
     }
+    public void remplirReservation(List<Reservation> reservations, List<Reservation> reservationsAssignees){
+       for (int i = 0; i < reservations.size(); i++) {
+            Reservation r = reservations.get(i);
+            if(this.getNbrPlaceDisponible()>=r.getNbPassager()&&r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES).equals(this.reservationsAssign.get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES))){
+                System.out.println("Ajout de la reservation #" + r.getId() + " avec " + r.getNbPassager() + " passagers à " + r.getDateArrivee() + " dans le véhicule " + this.getReference());
+                this.reservationsAssign.add(r);
+                reservationsAssignees.add(r);
+                i--;
+                System.out.println("delete de reservation : "+r.getId() );
+                
+                reservations.remove(r);
+
+            }
+        }
+    }
+
 }
