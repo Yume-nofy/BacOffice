@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import java.util.HashSet;
+import java.time.temporal.ChronoUnit;
 
 import dao.ParamDAO;
 import dao.LieuDAO;
+import java.time.*;
 
 public class Vehicule {
     private int id;
@@ -261,4 +264,14 @@ public class Vehicule {
         
         return dateRetourValue;
     }
+    public void remplirReservation(List<Reservation> reservations){
+        for(Reservation r: reservations){
+            if(this.getNbrPlaceDisponible()>=r.getNbPassager()&&r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES).equals(this.reservationsAssign.get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES))){
+                System.out.println("Ajout de la reservation #" + r.getId() + " avec " + r.getNbPassager() + " passagers à " + r.getDateArrivee() + " dans le véhicule " + this.getReference());
+                this.reservationsAssign.add(r);
+                
+            }
+        }
+    }
+
 }

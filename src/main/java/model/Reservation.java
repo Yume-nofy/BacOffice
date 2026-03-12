@@ -124,7 +124,7 @@ public class Reservation {
 
                     
                     }
-                    else if(v.getNbrPlaceDisponible()==meilleurChoix.get(0).getNbrPlaceDisponible()){
+                    else if(v.getNbrPlaceDisponible()==meilleurChoix.get(0).getNbrPlaceDisponible()&&AssignExiste){
                         
                         if(getPrioriteCarburant(v.getTypeCarburant())<getPrioriteCarburant(meilleurChoix.get(0).getTypeCarburant())){
                             meilleurChoix.clear();

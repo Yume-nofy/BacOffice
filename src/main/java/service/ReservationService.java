@@ -32,19 +32,22 @@ for (List<Reservation> listeDuGroupe : groupes.values()) {
     for (List<Reservation> groupe : groupes.values()) {
 
     for (Reservation r : groupe) {
-
+        System.out.println("Traitement de la reservation #" + r.getId() + " avec " + r.getNbPassager() + " passagers à " + r.getDateArrivee());
         // utiliser ta fonction pour trouver un véhicule
         Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules);
 
         if (vehiculeChoisi != null) {
-
+                System.out.println("Vehicule choisi: " + vehiculeChoisi.getReference() +
+                                   " pour reservation #" + r.getId());
             if (vehiculeChoisi.getReservationsAssign() == null) {
                 vehiculeChoisi.setReservationsAssign(new ArrayList<>());
             }
 
             vehiculeChoisi.getReservationsAssign().add(r);
-            reservationsAssignees.add(r);
-
+            // groupe.remove(r);
+            vehiculeChoisi.remplirReservation(groupe);
+            // reservationsAssignees.add(r);
+                
             // System.out.println("Vehicule choisi: " + vehiculeChoisi.getReference() +
             //                    " pour reservation #" + r.getId());
         }
