@@ -1,11 +1,7 @@
 package model;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
-import java.util.HashSet;
 import java.time.temporal.ChronoUnit;
 
 import dao.ParamDAO;
@@ -155,19 +151,25 @@ public class Vehicule {
 
     public void setRetourListDate(List<LocalDateTime> retourListDate) {
         List<LocalDateTime> sortedList = new ArrayList<>();
-        Lieu l1= lieux.get(0);
+        LieuDAO la = new LieuDAO();
+
+        Lieu l1=la.getLieuById(this.reservationsAssign.get(0).getIdHotel());
+        System.out.println("l1 :"+l1.getId());
         int i=0;
-        for(Lieu l : lieux) {
-            if(l1.getLibelle().compareIgnoreCase(l.getLibelle())==0) {
+        for(Reservation r : this.reservationsAssign) {
+            System.out.println("resercvation :"+r.getIdHotel());
+
+            if(l1.getId()==r.getIdHotel()) {
                 sortedList.add(retourListDate.get(i));
             }
             else{
                 sortedList.add(retourListDate.get(i));
                 i++;
+                l1=la.getLieuById(r.getIdHotel());
+                System.out.println(" i  ++ ");
             }
         }   
         this.retourListDate = sortedList;
-
     }
 
     public LocalDateTime getdateretourAssign() {
