@@ -16,8 +16,8 @@ import service.ReservationService;
 
 import java.time.format.DateTimeParseException;
 import java.time.LocalDateTime;
-import java.time.LocalDate; 
-import java.util.ArrayList;   
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @ControllerAnnotation
@@ -25,14 +25,26 @@ public class ReservationController {
 
     private final ReservationDAO reservationDAO = new ReservationDAO();
     private final HotelDAO hotelDAO = new HotelDAO();
-    @UrlAnnotation(url = "/reservations", method = "GET")
-    public ModelView listReservations() {
-     List<Reservation> reservations = reservationDAO.getAllReservations();
-        List<Hotel> hotels = hotelDAO.getAllHotels(); 
 
+    @UrlAnnotation(url = "/reservations", method = "GET")
+    public ModelView listReservations(
+            @RequestParam(value = "idHotel") String idHotelParam,
+            @RequestParam(value = "date") String dateParam
+    ) {
+        List<Reservation> reservations;
+        List<Hotel> hotels = hotelDAO.getAllHotels();
+        
+        if (idHotelParam != null && !idHotelParam.isEmpty() || (dateParam != null && !dateParam.isEmpty())) {
+            Integer idHotel = (idHotelParam != null && !idHotelParam.isEmpty()) ? Integer.parseInt(idHotelParam) : null;
+            LocalDate date = (dateParam != null && !dateParam.isEmpty()) ? LocalDate.parse(dateParam) : null;
+            reservations = reservationDAO.getFilteredReservations(idHotel, date);
+        } else {
+            reservations = reservationDAO.getAllReservations();
+        }
+        
         ModelView mv = new ModelView("reservations.jsp");
         mv.addObject("reservations", reservations);
-        mv.addObject("hotels", hotels); 
+        mv.addObject("hotels", hotels);
         return mv;
     }
 
@@ -41,35 +53,34 @@ public class ReservationController {
             @RequestParam("idClient") String idClient,
             @RequestParam("idHotel") int idHotel,
             @RequestParam("nbPassager") int nbPassager,
-            @RequestParam("dateArrivee") String dateArrivee 
-    ) {
+            @RequestParam("dateArrivee") String dateArrivee) {
         LocalDateTime dt = LocalDateTime.parse(dateArrivee);
         Reservation reservation = new Reservation(idClient, idHotel, nbPassager, dt);
         reservationDAO.addReservation(reservation);
-        List<Hotel> hotels = hotelDAO.getAllHotels(); 
+        List<Hotel> hotels = hotelDAO.getAllHotels();
         List<Reservation> reservations = reservationDAO.getAllReservations();
 
         ModelView mv = new ModelView("reservations.jsp");
         mv.addObject("reservation", reservation);
         mv.addObject("reservations", reservations);
-        mv.addObject("hotels", hotels); 
+        mv.addObject("hotels", hotels);
         return mv;
     }
 
-    @UrlAnnotation(url = "/api/assignationVehicule", method= "GET")
+    @UrlAnnotation(url = "/api/assignationVehicule", method = "GET")
     @JsonAnnotation
-    public ModelView getAssignationVehicule( @RequestParam("dateDebut") String dateDebut,@RequestParam("dateFin") String dateFin) {
-        
+    public ModelView getAssignationVehicule(@RequestParam("dateDebut") String dateDebut,
+            @RequestParam("dateFin") String dateFin) {
 
         LocalDate dateDebutParse = null;
         LocalDate dateFinParse = null;
 
-        if (dateDebut!=null && !dateDebut.isEmpty()) {
-            dateDebutParse= LocalDate.parse(dateDebut);
+        if (dateDebut != null && !dateDebut.isEmpty()) {
+            dateDebutParse = LocalDate.parse(dateDebut);
         }
 
-        if (dateFin!=null && !dateFin.isEmpty()) {
-            dateFinParse= LocalDate.parse(dateFin);
+        if (dateFin != null && !dateFin.isEmpty()) {
+            dateFinParse = LocalDate.parse(dateFin);
         }
 
         List<Reservation> reservations = reservationDAO.getReservationsByDate(dateDebutParse, dateFinParse);
@@ -87,11 +98,10 @@ public class ReservationController {
     @JsonAnnotation
     public ModelView getReservationsAsJson(
             @RequestParam("date") String date,
-            @RequestParam("token") String tokenValue
-    ) {
+            @RequestParam("token") String tokenValue) {
         TokenDAO tokenDAO = new TokenDAO();
         List<Token> tokens = tokenDAO.getAllTokens();
-        
+
         Token validToken = null;
         for (Token t : tokens) {
             if (t.getToken().equals(tokenValue) && !t.isExpired()) {
@@ -99,14 +109,14 @@ public class ReservationController {
                 break;
             }
         }
-        
+
         if (validToken == null) {
             ModelView mv = new ModelView("error.jsp");
             mv.addObject("error", "Token invalide ou expiré");
             mv.addObject("status", 401);
             return mv;
         }
-        
+
         List<Reservation> reservations = reservationDAO.getAllReservations();
 
         if (date == null || date.isEmpty()) {
@@ -120,17 +130,47 @@ public class ReservationController {
                 for (Reservation r : reservations) {
                     if (r.getDateArrivee().toLocalDate().equals(filterDate)) {
                         filteredReservations.add(r);
+                    }
                 }
+                ModelView mv = new ModelView("jsonView.jsp");
+                mv.addObject("data", filteredReservations);
+                return mv;
+            } catch (DateTimeParseException e) {
+                ModelView mv = new ModelView("error.jsp");
+                mv.addObject("error", "Format de date invalide");
+                mv.addObject("status", 400);
+                return mv;
             }
-            ModelView mv = new ModelView("jsonView.jsp");
-            mv.addObject("data", filteredReservations);
-            return mv;
-        } catch (DateTimeParseException e) {
-            ModelView mv = new ModelView("error.jsp");
-            mv.addObject("error", "Format de date invalide");
-            mv.addObject("status", 400);
-            return mv;
         }
     }
-}
+
+    @UrlAnnotation(url = "/reservation/delete", method = "GET")
+    public ModelView deleteReservation(@RequestParam("id") int id) {
+        reservationDAO.deleteReservation(id);
+
+        ModelView mv = new ModelView("redirect:/reservations");
+        mv.addObject("success", "Réservation supprimée avec succès");
+        return mv;
+    }
+
+    @UrlAnnotation(url = "/reservation/update", method = "POST")
+    public ModelView updateReservation(
+            @RequestParam("id") int id,
+            @RequestParam("idClient") String idClient,
+            @RequestParam("idHotel") int idHotel,
+            @RequestParam("nbPassager") int nbPassager,
+            @RequestParam("dateArrivee") String dateArrivee) {
+        LocalDateTime dt = LocalDateTime.parse(dateArrivee);
+        Reservation reservation = new Reservation(id, idClient, idHotel, nbPassager, dt, null);
+        reservationDAO.updateReservation(reservation);
+
+        List<Hotel> hotels = hotelDAO.getAllHotels();
+        List<Reservation> reservations = reservationDAO.getAllReservations();
+
+        ModelView mv = new ModelView("reservations.jsp");
+        mv.addObject("reservation", reservation);
+        mv.addObject("reservations", reservations);
+        mv.addObject("hotels", hotels);
+        return mv;
+    }
 }
