@@ -6,7 +6,6 @@ import java.time.temporal.ChronoUnit;
 
 import dao.ParamDAO;
 import dao.LieuDAO;
-import java.time.*;
 import java.util.*;
 
 
@@ -22,6 +21,7 @@ public class Vehicule {
     private Double distanceTotal;
     private List<LocalDateTime> retourListDate;
     private LocalDateTime dateRetour;
+    private LocalDateTime dateDepart;
     
     public Vehicule() {}
     
@@ -149,6 +149,14 @@ public class Vehicule {
         this.dateRetour = dateRetour;
     }
 
+    public LocalDateTime getDateDepart() {
+        return dateDepart;
+    }
+
+    public void setDateDepart(LocalDateTime dateDepart) {
+        this.dateDepart = dateDepart;
+    }
+
     public void setRetourListDate(List<LocalDateTime> retourListDate) {
         List<LocalDateTime> sortedList = new ArrayList<>();
         LieuDAO la = new LieuDAO();
@@ -273,14 +281,23 @@ public class Vehicule {
         long totalTemps = (long) tempsTrajet; 
         
         LocalDateTime dateRetourValue = dateDepart.plusMinutes(totalTemps);
+        LocalDateTime dateDeparte =LocalDateTime.parse("11/11/11 11:11:11", formatter);
+        
+        for (Reservation r : this.reservationsAssign) {
+            if (r.getDateArrivee().isAfter(dateDeparte)) {
+                dateDeparte = r.getDateArrivee();
+            }
+        }
         
         setLieux(lieusList);
         setDistanceTotal(distanceTotalValue);
         setRetourListDate(datRet);
+        setDateDepart(dateDeparte);
         setDateRetour(dateRetourValue);
         
         return dateRetourValue;
     }
+
     public void remplirReservation(List<Reservation> reservations, List<Reservation> reservationsAssignees){
        for (int i = 0; i < reservations.size(); i++) {
             Reservation r = reservations.get(i);

@@ -15,7 +15,7 @@ public class ReservationDAO {
     public void addReservation(Reservation reservation) {
         String sql = "INSERT INTO reservation (idclient, idhotel, nb_passager, date_arrivee) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, reservation.getIdClient());
             ps.setInt(2, reservation.getIdHotel());
@@ -41,8 +41,8 @@ public class ReservationDAO {
         String sql = "SELECT * FROM reservation r join  lieu h on h.id=r.idhotel";
 
         try (Connection conn = DBConnection.getConnection();
-             Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
                 Reservation r = new Reservation(
@@ -51,8 +51,7 @@ public class ReservationDAO {
                         rs.getInt("idhotel"),
                         rs.getInt("nb_passager"),
                         rs.getTimestamp("date_arrivee").toLocalDateTime(),
-                        rs.getString("libelle")
-                );
+                        rs.getString("libelle"));
                 reservations.add(r);
             }
 
@@ -66,30 +65,29 @@ public class ReservationDAO {
     public List<Reservation> getReservationsByDate(LocalDate dateDebut, LocalDate dateFin) {
         List<Reservation> reservations = new ArrayList<>();
         String sql = "SELECT r.id, r.idclient, r.idhotel, r.nb_passager, r.date_arrivee, h.libelle as hotel_nom " +
-                    "FROM reservation r " +
-                    "JOIN lieu h ON h.id = r.idhotel " +
-                    "WHERE r.date_arrivee BETWEEN ? AND ? " +
-                    "ORDER BY r.idhotel ASC ,r.date_arrivee ASC, r.nb_passager DESC";
+                "FROM reservation r " +
+                "JOIN lieu h ON h.id = r.idhotel " +
+                "WHERE r.date_arrivee BETWEEN ? AND ? " +
+                "ORDER BY r.idhotel ASC ,r.date_arrivee ASC, r.nb_passager DESC";
 
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             LocalDateTime debut = dateDebut.atStartOfDay();
             LocalDateTime fin = dateFin.atTime(23, 59, 59);
-            
+
             ps.setTimestamp(1, Timestamp.valueOf(debut));
             ps.setTimestamp(2, Timestamp.valueOf(fin));
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Reservation r = new Reservation(
-                        rs.getInt("id"),
-                        rs.getString("idclient"),
-                        rs.getInt("idhotel"),
-                        rs.getInt("nb_passager"),
-                        rs.getTimestamp("date_arrivee").toLocalDateTime(),
-                        rs.getString("hotel_nom") 
-                    );
+                            rs.getInt("id"),
+                            rs.getString("idclient"),
+                            rs.getInt("idhotel"),
+                            rs.getInt("nb_passager"),
+                            rs.getTimestamp("date_arrivee").toLocalDateTime(),
+                            rs.getString("hotel_nom"));
                     reservations.add(r);
                 }
             }
@@ -103,7 +101,7 @@ public class ReservationDAO {
     public Reservation getReservationById(int id) {
         String sql = "CT * FROM reservation r join  lieu h on h.id=r.idhotel WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -114,8 +112,7 @@ public class ReservationDAO {
                             rs.getInt("idhotel"),
                             rs.getInt("nb_passager"),
                             rs.getTimestamp("date_arrivee").toLocalDateTime(),
-                            rs.getString("libelle")
-                    );
+                            rs.getString("libelle"));
                 }
             }
 
@@ -130,7 +127,7 @@ public class ReservationDAO {
     public void updateReservation(Reservation reservation) {
         String sql = "UPDATE reservation SET idclient=?, idhotel=?, nb_passager=?, date_arrivee=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, reservation.getIdClient());
             ps.setInt(2, reservation.getIdHotel());
@@ -145,11 +142,10 @@ public class ReservationDAO {
         }
     }
 
-    // Supprimer une reservation
     public void deleteReservation(int id) {
         String sql = "DELETE FROM reservation WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -157,5 +153,56 @@ public class ReservationDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Reservation> getFilteredReservations(Integer idHotel, LocalDate date) {
+        List<Reservation> reservations = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT r.id, r.idclient, r.idhotel, r.nb_passager, r.date_arrivee, h.libelle as hotel_nom " +
+                        "FROM reservation r JOIN lieu h ON h.id = r.idhotel WHERE 1=1");
+
+        List<Object> params = new ArrayList<>();
+
+        if (idHotel != null) {
+            sql.append(" AND r.idhotel = ?");
+            params.add(idHotel);
+        }
+
+        if (date != null) {
+            sql.append(" AND DATE(r.date_arrivee) = ?");
+            params.add(Date.valueOf(date));
+        }
+
+        sql.append(" ORDER BY r.date_arrivee DESC");
+
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                if (params.get(i) instanceof Integer) {
+                    ps.setInt(i + 1, (Integer) params.get(i));
+                } else if (params.get(i) instanceof Date) {
+                    ps.setDate(i + 1, (Date) params.get(i));
+                }
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Reservation r = new Reservation(
+                            rs.getInt("id"),
+                            rs.getString("idclient"),
+                            rs.getInt("idhotel"),
+                            rs.getInt("nb_passager"),
+                            rs.getTimestamp("date_arrivee").toLocalDateTime(),
+                            rs.getString("hotel_nom"));
+                    reservations.add(r);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return reservations;
     }
 }
