@@ -14,6 +14,7 @@ public class Reservation {
     private int nbPassager;
     private LocalDateTime dateArrivee;
     private String nomHotel; // Ajoute pour stocker le nom de l'hôtel
+    private int group;
     // Constructeurs
 
     public Reservation() {
@@ -85,6 +86,14 @@ public class Reservation {
         this.dateArrivee = dateArrivee;
     }
 
+    public int getGroup() {
+        return group;
+    }
+
+    public void setGroup(int group) {
+        this.group = group;
+    }
+
     @Override
     public String toString() {
         return "Reservation{" +
@@ -105,26 +114,51 @@ public class Reservation {
                 .equals(r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES));
     }
 
-    public Vehicule getVehiculeApproprie(List<Vehicule> vehicules, LocalDateTime dateComp, LocalDateTime dateFin) {
+    public Vehicule getVehiculeApproprie(List<Vehicule> vehicules, LocalDateTime dateFin) {
         List<Vehicule> meilleurChoix = new ArrayList<>();
         LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+        System.out.println("\n--Recherche de véhicule pour la réservation #" + this.getId() + " avec "
+                + this.getNbPassager() + " passagers à " + this.getDateArrivee());
         for (Vehicule v : vehicules) {
 
             boolean AssignExiste = false;
             if (v.getReservationsAssign() != null && !v.getReservationsAssign().isEmpty()) {
                 AssignExiste = true;
             }
-            // System.out.println("Véhicule " + v.getId() + " - Date retour : "
-                    // + (v.getDateRetour() == null ? "null" : v.getDateRetour()));
-            // System.out.println("Comparaison dates : " + dateComp + " < " + v.getDateRetour() + " < " + dateFin);
+            Vehicule v2 = new Vehicule();
+            System.out.println("Véhicule " + v.getId() + " - Date retour : "
+                    + (v.getDateRetour() == null ? "null" : v.getDateRetour()));
+            System.out.println(v.getReference() + " " + System.identityHashCode(v));
 
-            if (v.getNbrPlaceDisponible() >= this.nbPassager && ((v.getDateRetour().isBefore(dateFin) && v.getDateRetour().isAfter(dateComp)) || v.getDateRetour().isEqual(epoch))) {
+            System.out.println("Vehicule group : " + v.getGroup() + " - Reservation group : " + this.getGroup());
+            if (this.getGroup() != v.getGroup() && v.getGroup() != 0) {
+                v2.setId(v.getId());
+                v2.setReference(v.getReference());
+                v2.setTypeCarburant(v.getTypeCarburant());
+                v2.setNbrPlace(v.getNbrPlace());
+                v2.setNombreTrajet(v.getNombreTrajet());
+                v2.setDateRetour(v.getDateRetour());
+                v2.setGroup(this.getGroup());
+                int index = vehicules.indexOf(v);
+                if (index != -1) {
+                    vehicules.set(index, v2);
+                }
+                v = v2;
+            }
+            System.out.println("Comparaison dates : " + v.getDateRetour() + " < " + dateFin);
+            System.out.println("Places disponibles : " + v.getNbrPlaceDisponible() + " pour " + this.getNbPassager()
+                    + " passagers");
+            if (v.getNbrPlaceDisponible() >= this.nbPassager
+                    && ((v.getDateRetour().isBefore(dateFin))
+                            || v.getDateRetour().isEqual(epoch))) {
+
                 if (v.getReservationsAssign() == null || v.getReservationsAssign().isEmpty()
                         || v.getReservationsAssign().get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES)
                                 .equals(this.dateArrivee.truncatedTo(ChronoUnit.MINUTES))) {
                     if (meilleurChoix == null || meilleurChoix.isEmpty()) {
                         System.out.println("Premier choix : " + v);
                         meilleurChoix.add(v);
+                        
                     } else if (v.getNbrPlaceDisponible() < meilleurChoix.get(0).getNbrPlaceDisponible()
                             && AssignExiste) {
                         meilleurChoix.clear();
@@ -146,16 +180,13 @@ public class Reservation {
                                 meilleurChoix.add(v);
                             } else if (getPrioriteCarburant(v.getTypeCarburant()) == getPrioriteCarburant(
                                     meilleurChoix.get(0).getTypeCarburant())) {
-                                System.out.println("Cinquième choix trouvé : " + v);    
+                                System.out.println("Cinquième choix trouvé : " + v);
                                 meilleurChoix.add(v);
                             }
                         }
                     }
-
                 }
-
             }
-
         }
         if (meilleurChoix.isEmpty()) {
             return null;
@@ -164,10 +195,10 @@ public class Reservation {
             return meilleurChoix.get(0);
 
         } else {
-            System.out.println("mety");
             Collections.shuffle(meilleurChoix);
             return meilleurChoix.get(0);
         }
+
     }
 
     private int getPrioriteCarburant(String type) {
