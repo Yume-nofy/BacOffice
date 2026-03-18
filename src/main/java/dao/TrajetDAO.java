@@ -265,7 +265,9 @@ public class TrajetDAO {
                     v.setNbrPlace(rs.getInt("nbr_place"));
                     v.setNombreTrajet(rs.getInt("nombre_trajets"));
                     v.setDateRetour(rs.getObject("derniere_date_retour", LocalDateTime.class));
+                    
                     vehiculesDisponibles.add(v);
+
                 }
             }
 

@@ -114,17 +114,21 @@ public class Reservation {
             if (v.getReservationsAssign() != null && !v.getReservationsAssign().isEmpty()) {
                 AssignExiste = true;
             }
+            // System.out.println("Véhicule " + v.getId() + " - Date retour : "
+                    // + (v.getDateRetour() == null ? "null" : v.getDateRetour()));
+            // System.out.println("Comparaison dates : " + dateComp + " < " + v.getDateRetour() + " < " + dateFin);
 
-            if (v.getNbrPlaceDisponible() >= this.nbPassager && ((v.getDateRetour().isBefore(dateFin) && v.getDateRetour().isAfter(dateComp)) || v.getDateRetour().equals(epoch))) {
-
+            if (v.getNbrPlaceDisponible() >= this.nbPassager && ((v.getDateRetour().isBefore(dateFin) && v.getDateRetour().isAfter(dateComp)) || v.getDateRetour().isEqual(epoch))) {
                 if (v.getReservationsAssign() == null || v.getReservationsAssign().isEmpty()
                         || v.getReservationsAssign().get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES)
                                 .equals(this.dateArrivee.truncatedTo(ChronoUnit.MINUTES))) {
                     if (meilleurChoix == null || meilleurChoix.isEmpty()) {
+                        System.out.println("Premier choix : " + v);
                         meilleurChoix.add(v);
                     } else if (v.getNbrPlaceDisponible() < meilleurChoix.get(0).getNbrPlaceDisponible()
                             && AssignExiste) {
                         meilleurChoix.clear();
+                        System.out.println("Deuxieme choix trouvé : " + v);
                         meilleurChoix.add(v);
 
                     } else if (v.getNbrPlaceDisponible() == meilleurChoix.get(0).getNbrPlaceDisponible()
@@ -132,14 +136,17 @@ public class Reservation {
 
                         if (v.getNombreTrajet() < meilleurChoix.get(0).getNombreTrajet()) {
                             meilleurChoix.clear();
+                            System.out.println("Troisième choix trouvé : " + v);
                             meilleurChoix.add(v);
                         } else if (v.getNombreTrajet() == meilleurChoix.get(0).getNombreTrajet()) {
                             if (getPrioriteCarburant(v.getTypeCarburant()) < getPrioriteCarburant(
                                     meilleurChoix.get(0).getTypeCarburant())) {
                                 meilleurChoix.clear();
+                                System.out.println("Quatrième choix trouvé : " + v);
                                 meilleurChoix.add(v);
                             } else if (getPrioriteCarburant(v.getTypeCarburant()) == getPrioriteCarburant(
                                     meilleurChoix.get(0).getTypeCarburant())) {
+                                System.out.println("Cinquième choix trouvé : " + v);    
                                 meilleurChoix.add(v);
                             }
                         }

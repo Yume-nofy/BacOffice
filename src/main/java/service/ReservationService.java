@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import javax.swing.text.Style;
+
 import framework.ModelView;
 import model.*;
 
@@ -56,13 +58,15 @@ public class ReservationService {
                 // System.out.println("Traitement de la réservation : " + groupe.get(i));
                 Reservation r = groupe.get(i);
                 Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules, groupe.get(0).getDateArrivee(), groupe.get(0).getDateArrivee().plusMinutes((long) dureeDattente));
-                ves.add(vehiculeChoisi);
+                
+                
                 if (datDepart.isBefore(r.getDateArrivee())) {
                     datDepart=r.getDateArrivee();
                 }
                 
             
                 if (vehiculeChoisi != null) {
+                    ves.add(vehiculeChoisi);
                     if (datDepart.isBefore(vehiculeChoisi.getDateRetour())) {
                     datDepart=r.getDateArrivee();
                 }
