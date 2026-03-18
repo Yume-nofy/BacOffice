@@ -22,6 +22,8 @@ public class Vehicule {
     private List<LocalDateTime> retourListDate;
     private LocalDateTime dateRetour;
     private LocalDateTime dateDepart;
+    private int nombreTrajet;
+
     
     public Vehicule() {}
     
@@ -155,6 +157,14 @@ public class Vehicule {
 
     public void setDateDepart(LocalDateTime dateDepart) {
         this.dateDepart = dateDepart;
+    }
+
+    public int getNombreTrajet() {
+        return nombreTrajet;
+    }
+
+    public void setNombreTrajet(int nombreTrajet) {
+        this.nombreTrajet = nombreTrajet;
     }
 
     public void setRetourListDate(List<LocalDateTime> retourListDate) {

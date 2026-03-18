@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import dao.TrajetDAO;
 import framework.ModelView;
 import model.*;
 
@@ -45,8 +47,9 @@ public class ReservationService {
         }
 
         for (List<Reservation> groupe : groupes.values()) {
-
+            // System.out.println("Groupe pour " + groupe.get(0).getDateArrivee());
             for (int i = 0; i < groupe.size(); i++) {
+                // System.out.println("Traitement de la réservation : " + groupe.get(i));
                 Reservation r = groupe.get(i);
                 Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules);
 
