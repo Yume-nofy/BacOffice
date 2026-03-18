@@ -60,11 +60,12 @@ public class ReservationService {
                 if (datDepart.isBefore(r.getDateArrivee())) {
                     datDepart=r.getDateArrivee();
                 }
-                if (datDepart.isBefore(vehiculeChoisi.getDateRetour())) {
-                    datDepart=r.getDateArrivee();
-                }
+                
             
                 if (vehiculeChoisi != null) {
+                    if (datDepart.isBefore(vehiculeChoisi.getDateRetour())) {
+                    datDepart=r.getDateArrivee();
+                }
                     if (vehiculeChoisi.getReservationsAssign() == null) {
                         vehiculeChoisi.setReservationsAssign(new ArrayList<>());
                     }

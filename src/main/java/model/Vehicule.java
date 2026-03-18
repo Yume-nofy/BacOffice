@@ -117,8 +117,11 @@ public class Vehicule {
 
     public int getNbrPlaceDisponible() {
         int c = 0;
+        if(reservationsAssign!=null){
+
         for (Reservation reservation : reservationsAssign) {
             c += reservation.getNbPassager();
+        }
         }
         return this.nbrPlace-c;
     }

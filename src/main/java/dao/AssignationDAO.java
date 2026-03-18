@@ -12,7 +12,7 @@ import java.util.List;
 public class AssignationDAO {
     
     private ReservationDAO reservationDAO = new ReservationDAO();
-    private TrajetDAO trajetDAO = new TrajetDAO();
+   
     
     /**
      * Add a new assignation
@@ -135,8 +135,8 @@ public class AssignationDAO {
                     Assignation a = extractAssignationFromResultSet(rs);
                     
                     // Load associated trajet
-                    Trajet trajet = trajetDAO.getTrajetById(a.getIdTrajet());
-                    a.setTrajet(trajet);
+                    
+                
                     
                     assignations.add(a);
                 }

@@ -115,7 +115,7 @@ public class Reservation {
                 AssignExiste = true;
             }
 
-            if (v.getNbrPlaceDisponible() >= this.nbPassager && ((v.getDateRetour().isBefore(dateFin) && v.getDateRetour().isAfter(dateComp) || v.getDateRetour().equals(epoch)))) {
+            if (v.getNbrPlaceDisponible() >= this.nbPassager && ((v.getDateRetour().isBefore(dateFin) && v.getDateRetour().isAfter(dateComp)) || v.getDateRetour().equals(epoch))) {
 
                 if (v.getReservationsAssign() == null || v.getReservationsAssign().isEmpty()
                         || v.getReservationsAssign().get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES)

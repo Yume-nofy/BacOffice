@@ -1,1 +1,1 @@
-TRUNCATE TABLE distance, reservation, vehicule, token, lieu RESTART IDENTITY CASCADE;
+TRUNCATE TABLE distance, reservation, vehicule, lieu RESTART IDENTITY CASCADE;

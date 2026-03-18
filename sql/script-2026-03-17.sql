@@ -10,6 +10,7 @@ CREATE TABLE assignation (
     id SERIAL PRIMARY KEY,
     idtrajet INTEGER REFERENCES trajet(id),
     idreservation INTEGER REFERENCES reservation(id),
+    nb_passager INTEGER,
     ordre INTEGER NOT NULL 
 );
 
