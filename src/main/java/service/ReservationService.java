@@ -51,12 +51,17 @@ public class ReservationService {
         for (List<Reservation> groupe : groupes.values()) {
             // System.out.println("Groupe pour " + groupe.get(0).getDateArrivee());
             LocalDateTime datDepart = LocalDateTime.parse("11/11/11 11:11:11", formatter);
+            List<Vehicule> ves = new ArrayList<>();
             for (int i = 0; i < groupe.size(); i++) {
                 // System.out.println("Traitement de la réservation : " + groupe.get(i));
                 Reservation r = groupe.get(i);
                 Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules, groupe.get(0).getDateArrivee(), groupe.get(0).getDateArrivee().plusMinutes((long) dureeDattente));
-                if(vehiculeChoisi.getDateRetour().isAfter(datDepart)) {
-                    datDepart= vehiculeChoisi.getDateRetour();
+                ves.add(vehiculeChoisi);
+                if (datDepart.isBefore(r.getDateArrivee())) {
+                    datDepart=r.getDateArrivee();
+                }
+                if (datDepart.isBefore(vehiculeChoisi.getDateRetour())) {
+                    datDepart=r.getDateArrivee();
                 }
             
                 if (vehiculeChoisi != null) {
@@ -72,6 +77,9 @@ public class ReservationService {
                     reservationsAssignees.add(r);
 
                 }
+            }
+            for (Vehicule v: ves) {
+                v.setDateDepart(datDepart);
             }
 
         }
