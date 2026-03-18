@@ -2,10 +2,10 @@ package dao;
 
 import model.Assignation;
 import model.Reservation;
-import model.Trajet;
 import util.DBConnection;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class AssignationDAO {
      * Add a new assignation
      */
     public void addAssignation(Assignation assignation) {
-        String sql = "INSERT INTO assignation (idtrajet, idreservation, ordre) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO assignation (idtrajet, idreservation, ordre, nb_passager) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -26,6 +26,7 @@ public class AssignationDAO {
             ps.setInt(1, assignation.getIdTrajet());
             ps.setInt(2, assignation.getIdReservation());
             ps.setInt(3, assignation.getOrdre());
+            ps.setInt(4, assignation.getNbpassager());
             
             ps.executeUpdate();
             
@@ -177,7 +178,7 @@ public class AssignationDAO {
      * Update an assignation
      */
     public void updateAssignation(Assignation assignation) {
-        String sql = "UPDATE assignation SET idtrajet=?, idreservation=?, ordre=? WHERE id=?";
+        String sql = "UPDATE assignation SET idtrajet=?, idreservation=?, ordre=?, nb_passager=? WHERE id=?";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -185,7 +186,8 @@ public class AssignationDAO {
             ps.setInt(1, assignation.getIdTrajet());
             ps.setInt(2, assignation.getIdReservation());
             ps.setInt(3, assignation.getOrdre());
-            ps.setInt(4, assignation.getId());
+            ps.setInt(4, assignation.getNbpassager());
+            ps.setInt(5, assignation.getId());
             
             ps.executeUpdate();
             
@@ -236,7 +238,8 @@ public class AssignationDAO {
             rs.getInt("id"),
             rs.getInt("idtrajet"),
             rs.getInt("idreservation"),
-            rs.getInt("ordre")
+            rs.getInt("ordre"),
+            rs.getInt("nb_passager")
         );
         return assignation;
     }
@@ -263,5 +266,20 @@ public class AssignationDAO {
         }
         
         return false;
+    }
+
+    public void deleteAllAssignation(LocalDate dateDebut, LocalDate dateFin) {
+        String sql = "DELETE a FROM assignation a " +
+                "JOIN trajet t ON a.idtrajet = t.id " +
+                "WHERE t.date_depart >= ? AND t.date_retour <= ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setTimestamp(1, Timestamp.valueOf(dateDebut.atStartOfDay()));
+            ps.setTimestamp(2, Timestamp.valueOf(dateFin.atTime(23, 59, 59)));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

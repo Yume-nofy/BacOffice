@@ -8,6 +8,8 @@ import java.util.*;
 
 import framework.ModelView;
 import model.*;
+import dao.TrajetDAO;
+import dao.AssignationDAO;
 
 public class ReservationService {
 
@@ -138,6 +140,30 @@ public class ReservationService {
         ModelView mv = new ModelView("jsonView.jsp");
         mv.addObject("vehicules", vehiculesUtilises);
         mv.addObject("reservationsSansVehicule", reservationsSansVehicule);
+        TrajetDAO trajetDAO = new TrajetDAO();
+        AssignationDAO assignationDAO = new AssignationDAO();
+        assignationDAO.deleteAllAssignation(dateDebut, dateFin);
+        trajetDAO.deleteAllTrajets(dateDebut, dateFin);
+
+        for (Vehicule v : vehiculesUtilises) {
+            Trajet trajet = new Trajet();
+            trajet.setIdVehicule(v.getId());
+            trajet.setDateDepart(v.getDateDepart());
+            trajet.setDateRetour(v.getDateRetour());
+            trajet.setDistanceParcourue(v.getDistanceTotal());
+            
+            int idtrajet= trajetDAO.addTrajet(trajet);
+
+            for (Reservation r : v.getReservationsAssign()) {
+                Assignation assignation = new Assignation();
+                assignation.setIdTrajet(idtrajet);
+                assignation.setIdReservation(r.getId());
+                assignation.setNbpassager(r.getNbPassager());
+
+                assignationDAO.addAssignation(assignation);
+            }
+        }
+
 
         return mv;
     }

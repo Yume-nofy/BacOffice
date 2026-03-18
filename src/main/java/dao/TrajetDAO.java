@@ -7,22 +7,21 @@ import util.DBConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class TrajetDAO {
 
     private VehiculeDAO vehiculeDAO = new VehiculeDAO();
     private AssignationDAO assignationDAO = new AssignationDAO();
 
-    /**
-     * Add a new trajet
-     */
-    public void addTrajet(Trajet trajet) {
+    public int addTrajet(Trajet trajet) {
         String sql = "INSERT INTO trajet (idvehicule, distance_parcourue, date_depart, date_retour) VALUES (?, ?, ?, ?)";
+        int generatedId = -1; 
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, trajet.getIdVehicule());
             ps.setDouble(2, trajet.getDistanceParcourue() != null ? trajet.getDistanceParcourue() : 0.0);
@@ -33,26 +32,19 @@ public class TrajetDAO {
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
-                    trajet.setId(rs.getInt(1));
+                    generatedId = rs.getInt(1);
+                    trajet.setId(generatedId); 
                 }
             }
 
-            // Save assignations if any
-            if (trajet.getAssignations() != null && !trajet.getAssignations().isEmpty()) {
-                for (Assignation assignation : trajet.getAssignations()) {
-                    assignation.setIdTrajet(trajet.getId());
-                    assignationDAO.addAssignation(assignation);
-                }
-            }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
+        return generatedId; 
     }
-
-    /**
-     * Get all trajets
-     */
+ 
     public List<Trajet> getAllTrajets() {
         List<Trajet> trajets = new ArrayList<>();
         String sql = "SELECT * FROM trajet ORDER BY date_depart DESC";
@@ -265,7 +257,7 @@ public class TrajetDAO {
                     v.setNbrPlace(rs.getInt("nbr_place"));
                     v.setNombreTrajet(rs.getInt("nombre_trajets"));
                     v.setDateRetour(rs.getObject("derniere_date_retour", LocalDateTime.class));
-                    
+
                     vehiculesDisponibles.add(v);
 
                 }
@@ -276,5 +268,21 @@ public class TrajetDAO {
         }
 
         return vehiculesDisponibles;
+    }
+
+    public void deleteAllTrajets(LocalDate dateDebut, LocalDate dateFin) {
+        String sql = "DELETE FROM trajet WHERE date_depart BETWEEN ? AND ?";
+
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setTimestamp(1, Timestamp.valueOf(dateDebut.atStartOfDay()));
+            ps.setTimestamp(2, Timestamp.valueOf(dateFin.atTime(23, 59, 59)));
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

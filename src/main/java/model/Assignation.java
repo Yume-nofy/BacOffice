@@ -5,6 +5,7 @@ public class Assignation {
     private int idTrajet;
     private int idReservation;
     private int ordre;
+    private int nbpassager;
     
     // Relationships
     private Trajet trajet;
@@ -18,11 +19,12 @@ public class Assignation {
         this.ordre = ordre;
     }
     
-    public Assignation(int id, int idTrajet, int idReservation, int ordre) {
+    public Assignation(int id, int idTrajet, int idReservation, int ordre, int nbpassger) {
         this.id = id;
         this.idTrajet = idTrajet;
         this.idReservation = idReservation;
         this.ordre = ordre;
+        this.nbpassager= nbpassger;
     }
     
     // Getters and Setters
@@ -79,6 +81,14 @@ public class Assignation {
             this.idReservation = reservation.getId();
         }
     }
+
+    public int getNbpassager() {
+        return nbpassager;
+    }
+
+    public void setNbpassager(int nbpassager) {
+        this.nbpassager = nbpassager;
+    }
     
     @Override
     public String toString() {
@@ -87,6 +97,7 @@ public class Assignation {
                 ", idTrajet=" + idTrajet +
                 ", idReservation=" + idReservation +
                 ", ordre=" + ordre +
+                ", nb_passager " + nbpassager +
                 '}';
     }
 }
