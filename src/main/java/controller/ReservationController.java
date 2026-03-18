@@ -8,7 +8,7 @@ import framework.UrlAnnotation;
 
 import dao.ReservationDAO;
 import dao.TokenDAO;
-import dao.VehiculeDAO;
+import dao.TrajetDAO;
 import dao.HotelDAO;
 import dao.ParamDAO;
 import model.*;
@@ -87,8 +87,8 @@ public class ReservationController {
         ParamDAO pDAO = new ParamDAO();
         Param p = pDAO.getParam();
 
-        VehiculeDAO vDAO = new VehiculeDAO();
-        List<Vehicule> vehicules = vDAO.getAllVehicules();
+        TrajetDAO tDAO = new TrajetDAO();
+        List<Vehicule> vehicules = tDAO.getVehiculesDisponibles(dateDebutParse.atStartOfDay(), dateFinParse.atTime(23, 59, 59));
         ReservationService rs = new ReservationService();
 
         return rs.assignerVehicule(dateDebutParse, dateFinParse, reservations, vehicules, p);
