@@ -243,7 +243,7 @@ public class TrajetDAO {
     public List<Vehicule> getVehiculesDisponibles(LocalDateTime dateDebut, LocalDateTime dateFin) {
         List<Vehicule> vehiculesDisponibles = new ArrayList<>();
 
-        String sql = "SELECT v.*, vd.nombre_trajets FROM vehicule v " +
+        String sql = "SELECT v.*, vd.nombre_trajets , vd.derniere_date_retour FROM vehicule v " +
                 "JOIN vehicule_disponibilite vd ON v.id = vd.id " +
                 "WHERE vd.derniere_date_retour <= ? " +
                 "AND (vd.derniere_date_retour BETWEEN ? AND ? " +
@@ -264,7 +264,7 @@ public class TrajetDAO {
                     v.setTypeCarburant(rs.getString("type_carburant"));
                     v.setNbrPlace(rs.getInt("nbr_place"));
                     v.setNombreTrajet(rs.getInt("nombre_trajets"));
-
+                    v.setDateRetour(rs.getObject("derniere_date_retour", LocalDateTime.class));
                     vehiculesDisponibles.add(v);
                 }
             }

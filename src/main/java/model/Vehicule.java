@@ -263,8 +263,6 @@ public class Vehicule {
                 break;
             }
             double tmpT = (distanceMinimale/vitesseMoyenne)*60;
-            System.out.println("date actuel : "+ dateActuel);
-            System.out.println("minute trajet : "+tmpT);
             dateActuel= dateActuel.plusMinutes((long)tmpT);
             datRet.add(dateActuel);
             lieusList.add(lieuPlusProche);
@@ -285,7 +283,7 @@ public class Vehicule {
         
         distanceDirect += aeroportLieu.calculeDistance(dernierLieu);
         distanceTotalValue = (distanceDirect != null && distanceDirect > 0) ? distanceDirect : 0.0;
-        System.out.println("distanceTotalValue :"+distanceTotalValue);
+        // System.out.println("distanceTotalValue :"+distanceTotalValue);
         double tempsTrajet = (distanceTotalValue / vitesseMoyenne) * 60; 
         
         long totalTemps = (long) tempsTrajet; 
@@ -298,6 +296,7 @@ public class Vehicule {
                 dateDeparte = r.getDateArrivee();
             }
         }
+        
         
         setLieux(lieusList);
         setDistanceTotal(distanceTotalValue);

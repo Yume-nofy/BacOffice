@@ -2,10 +2,10 @@ package service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import dao.TrajetDAO;
 import framework.ModelView;
 import model.*;
 
@@ -15,6 +15,8 @@ public class ReservationService {
             List<Vehicule> vehicules, Param p) {
         List<Reservation> reservationsSansVehicule = new ArrayList<>(reservations);
         List<Reservation> reservationsAssignees = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss");
+
         
         reservations.sort(
                 Comparator.comparing(Reservation::getDateArrivee)
@@ -48,11 +50,15 @@ public class ReservationService {
 
         for (List<Reservation> groupe : groupes.values()) {
             // System.out.println("Groupe pour " + groupe.get(0).getDateArrivee());
+            LocalDateTime datDepart = LocalDateTime.parse("11/11/11 11:11:11", formatter);
             for (int i = 0; i < groupe.size(); i++) {
                 // System.out.println("Traitement de la réservation : " + groupe.get(i));
                 Reservation r = groupe.get(i);
-                Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules);
-
+                Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules, groupe.get(0).getDateArrivee(), groupe.get(0).getDateArrivee().plusMinutes((long) dureeDattente));
+                if(vehiculeChoisi.getDateRetour().isAfter(datDepart)) {
+                    datDepart= vehiculeChoisi.getDateRetour();
+                }
+            
                 if (vehiculeChoisi != null) {
                     if (vehiculeChoisi.getReservationsAssign() == null) {
                         vehiculeChoisi.setReservationsAssign(new ArrayList<>());
@@ -79,6 +85,8 @@ public class ReservationService {
                 vehiculesUtilises.add(v);
             }
         }
+
+  
 
         ModelView mv = new ModelView("jsonView.jsp");
         mv.addObject("vehicules", vehiculesUtilises);

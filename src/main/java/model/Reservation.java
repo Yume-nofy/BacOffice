@@ -105,8 +105,9 @@ public class Reservation {
                 .equals(r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES));
     }
 
-    public Vehicule getVehiculeApproprie(List<Vehicule> vehicules) {
+    public Vehicule getVehiculeApproprie(List<Vehicule> vehicules, LocalDateTime dateComp, LocalDateTime dateFin) {
         List<Vehicule> meilleurChoix = new ArrayList<>();
+        LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
         for (Vehicule v : vehicules) {
 
             boolean AssignExiste = false;
@@ -114,14 +115,13 @@ public class Reservation {
                 AssignExiste = true;
             }
 
-            if (v.getNbrPlaceDisponible() >= this.nbPassager) {
+            if (v.getNbrPlaceDisponible() >= this.nbPassager && ((v.getDateRetour().isBefore(dateFin) && v.getDateRetour().isAfter(dateComp) || v.getDateRetour().equals(epoch)))) {
 
                 if (v.getReservationsAssign() == null || v.getReservationsAssign().isEmpty()
                         || v.getReservationsAssign().get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES)
                                 .equals(this.dateArrivee.truncatedTo(ChronoUnit.MINUTES))) {
                     if (meilleurChoix == null || meilleurChoix.isEmpty()) {
                         meilleurChoix.add(v);
-
                     } else if (v.getNbrPlaceDisponible() < meilleurChoix.get(0).getNbrPlaceDisponible()
                             && AssignExiste) {
                         meilleurChoix.clear();
