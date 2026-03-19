@@ -246,7 +246,7 @@ public class TrajetDAO {
                 "    WHEN 'Es' THEN 2 " +
                 "    WHEN 'El' THEN 3 " +
                 "    ELSE 4 " +
-                "END DESC";
+                "END ASC";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
