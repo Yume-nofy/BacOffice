@@ -18,10 +18,10 @@ public class TrajetDAO {
 
     public int addTrajet(Trajet trajet) {
         String sql = "INSERT INTO trajet (idvehicule, distance_parcourue, date_depart, date_retour) VALUES (?, ?, ?, ?)";
-        int generatedId = -1; 
+        int generatedId = -1;
 
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, trajet.getIdVehicule());
             ps.setDouble(2, trajet.getDistanceParcourue() != null ? trajet.getDistanceParcourue() : 0.0);
@@ -33,18 +33,17 @@ public class TrajetDAO {
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     generatedId = rs.getInt(1);
-                    trajet.setId(generatedId); 
+                    trajet.setId(generatedId);
                 }
             }
-
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        return generatedId; 
+
+        return generatedId;
     }
- 
+
     public List<Trajet> getAllTrajets() {
         List<Trajet> trajets = new ArrayList<>();
         String sql = "SELECT * FROM trajet ORDER BY date_depart DESC";
@@ -235,11 +234,19 @@ public class TrajetDAO {
     public List<Vehicule> getVehiculesDisponibles(LocalDateTime dateDebut, LocalDateTime dateFin) {
         List<Vehicule> vehiculesDisponibles = new ArrayList<>();
 
-        String sql = "SELECT v.*, vd.nombre_trajets , vd.derniere_date_retour FROM vehicule v " +
+        String sql = "SELECT v.*, vd.nombre_trajets, vd.derniere_date_retour " +
+                "FROM vehicule v " +
                 "JOIN vehicule_disponibilite vd ON v.id = vd.id " +
                 "WHERE vd.derniere_date_retour <= ? " +
                 "AND (vd.derniere_date_retour BETWEEN ? AND ? " +
-                "OR vd.derniere_date_retour = TIMESTAMP '1970-01-01 00:00:00')";
+                "OR vd.derniere_date_retour = TIMESTAMP '1970-01-01 00:00:00') " +
+                "ORDER BY v.nbr_place ASC, " +
+                "CASE v.type_carburant " +
+                "    WHEN 'D' THEN 1 " +
+                "    WHEN 'Es' THEN 2 " +
+                "    WHEN 'El' THEN 3 " +
+                "    ELSE 4 " +
+                "END DESC";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {

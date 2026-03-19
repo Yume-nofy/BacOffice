@@ -114,7 +114,7 @@ public class Reservation {
                 .equals(r.getDateArrivee().truncatedTo(ChronoUnit.MINUTES));
     }
 
-    public Vehicule getVehiculeApproprie(List<Vehicule> vehicules, LocalDateTime dateFin) {
+    public Vehicule getVehiculeApproprie(List<Vehicule> vehicules, LocalDateTime dateFin, List<Reservation> ress) {
         List<Vehicule> meilleurChoix = new ArrayList<>();
         LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
         System.out.println("\n--Recherche de véhicule pour la réservation #" + this.getId() + " avec "
@@ -148,9 +148,9 @@ public class Reservation {
             System.out.println("Comparaison dates : " + v.getDateRetour() + " < " + dateFin);
             System.out.println("Places disponibles : " + v.getNbrPlaceDisponible() + " pour " + this.getNbPassager()
                     + " passagers");
-            if (v.getNbrPlaceDisponible() >= this.nbPassager
-                    && ((v.getDateRetour().isBefore(dateFin))
-                            || v.getDateRetour().isEqual(epoch))) {
+            System.out.println("---condition : "+ (v.getNbrPlaceDisponible() <= this.nbPassager)+  " &&  ( "+(v.getDateRetour().isBefore(dateFin))+" ||"+(v.getDateRetour().isEqual(epoch))+" )  ");
+            if (v.getNbrPlaceDisponible() >= this.nbPassager && (v.getDateRetour().isBefore(dateFin)
+                    || v.getDateRetour().isEqual(epoch))) {
 
                 if (v.getReservationsAssign() == null || v.getReservationsAssign().isEmpty()
                         || v.getReservationsAssign().get(0).getDateArrivee().truncatedTo(ChronoUnit.MINUTES)
@@ -158,7 +158,7 @@ public class Reservation {
                     if (meilleurChoix == null || meilleurChoix.isEmpty()) {
                         System.out.println("Premier choix : " + v);
                         meilleurChoix.add(v);
-                        
+
                     } else if (v.getNbrPlaceDisponible() < meilleurChoix.get(0).getNbrPlaceDisponible()
                             && AssignExiste) {
                         meilleurChoix.clear();
@@ -189,7 +189,28 @@ public class Reservation {
             }
         }
         if (meilleurChoix.isEmpty()) {
-            return null;
+            Vehicule v = vehicules.get(0);
+            if (v.getNbrPlaceDisponible() - this.nbPassager != 0 && v.getNbrPlaceDisponible()!=0) {
+                Reservation newre = new Reservation();
+                newre.setId(this.getId());
+                newre.setDateArrivee(this.getDateArrivee());
+                newre.setNbPassager(this.getNbPassager() - v.getNbrPlaceDisponible());
+                newre.setIdHotel(this.getIdHotel());
+                newre.setIdClient(this.getIdClient());
+                newre.setGroup(this.getGroup());
+                newre.setNomHotel(this.getNomHotel());
+
+                this.setNbPassager(v.getNbrPlaceDisponible());
+                ress.add(newre);
+
+                System.out.println("Création d'une réservation partielle : " + newre);
+                System.out.println("Avec vehicule "+ v.getId()+" ");
+                return v;
+
+            } else {
+                System.out.println("Aucun véhicule disponible pour la réservation #" + this.getId());
+                return null;
+            }
         } else if (meilleurChoix.size() == 1) {
 
             return meilleurChoix.get(0);

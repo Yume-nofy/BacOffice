@@ -54,6 +54,16 @@ public class ReservationService {
         for (List<Reservation> groupe : groupes.values()) {
             if (!nonasi.isEmpty()) {
                 groupe.addAll(nonasi);
+                // System.out.println("Ajout des reservations non assignes dans le groupe  "+k);
+                // for (Reservation r : nonasi) {
+                //     System.out.println("Aucune assignation possible pour la réservation #" +
+                //             r.getId());
+                // }
+                // System.out.println("Groupe avec les nouveau reservations");
+                // for (Reservation r : groupe) {
+                //     System.out.println("Aucune assignation possible pour la réservation #" +
+                //             r.getId());
+                // }
                 nonasi.clear();
             }
             System.out.println("\nGroupe n " + k + " pour " + groupe.get(0).getDateArrivee());
@@ -61,12 +71,22 @@ public class ReservationService {
             // + groupe.get(0).getDateArrivee().plusMinutes((long) dureeDattente));
             LocalDateTime datDepart = LocalDateTime.parse("11/11/11 11:11:11", formatter);
             List<Vehicule> ves = new ArrayList<>();
+            List<Reservation> ress = new ArrayList<>();
+            trierReservationsParPriorite(groupe);
+
             for (int i = 0; i < groupe.size(); i++) {
                 System.out.println("Traitement de la réservation : " + groupe.get(i));
                 Reservation r = groupe.get(i);
                 r.setGroup(k);
+                LocalDateTime dateCleGroupe = null;
+                for (Map.Entry<LocalDateTime, List<Reservation>> entry : groupes.entrySet()) {
+                    if (entry.getValue() == groupe) {
+                        dateCleGroupe = entry.getKey();
+                        break;
+                    }
+                }
                 Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules,
-                        groupe.get(0).getDateArrivee().plusMinutes((long) dureeDattente));
+                        dateCleGroupe.plusMinutes((long) dureeDattente), ress);
 
                 if (datDepart.isBefore(r.getDateArrivee())) {
                     datDepart = r.getDateArrivee();
@@ -75,7 +95,8 @@ public class ReservationService {
                 if (vehiculeChoisi != null) {
                     System.out.println("Assignation de la réservation #" + r.getId() + " au véhicule "
                             + vehiculeChoisi.getReference() + " referenceuniqueobjet: "
-                            + System.identityHashCode(vehiculeChoisi));
+                            + System.identityHashCode(vehiculeChoisi) + " avec nombre de passager "
+                            + r.getNbPassager());
                     // System.out.println("Avec date de retour: "+ vehiculeChoisi.getDateRetour());
                     ves.add(vehiculeChoisi);
                     vehicuFinal.add(vehiculeChoisi);
@@ -95,7 +116,7 @@ public class ReservationService {
 
                     groupe.remove(r);
                     i--;
-                    vehiculeChoisi.remplirReservation(groupe, reservationsAssignees);
+                    vehiculeChoisi.remplirReservation(groupe, reservationsAssignees, ress);
 
                     reservationsAssignees.add(r);
 
@@ -103,6 +124,12 @@ public class ReservationService {
                     nonasi.add(r);
                 }
             }
+            // System.out.println(" Contenue de ress,( ajout dans nonasi): ");
+            for (Reservation t : ress) {
+                // System.out.println("reservation: " + t.getId()+" avec "+t.getNbPassager()+" passager");
+                nonasi.add(t);
+            }
+            ress.clear();
             for (Vehicule v : ves) {
                 // System.out.println("Comparaison date recente du véhicule " + v.getReference()
                 // + " : " + v.getdaterecent() + " avec date de départ actuelle : " +
@@ -118,13 +145,18 @@ public class ReservationService {
                 v.setDateDepart(datDepart);
                 v.getdateretourAssign();
             }
-            // for (Reservation r: nonasi) {
-            //     System.out.println("Aucune assignation possible pour la réservation #" + r.getId());
+
+            // System.out.println("Contenue Final de Non assigne avant fin de boucle : ");
+            // for (Reservation t : nonasi) {
+            //     System.out.println(" --reservation: " + t.getId()+" avec "+t.getNbPassager()+" passager");
             // }
+
             k++;
         }
 
         reservationsSansVehicule.removeAll(reservationsAssignees);
+        reservationsSansVehicule.addAll(nonasi);
+        reservationsSansVehicule = enleverReservationsEnDouble(reservationsSansVehicule);
 
         List<Vehicule> vehiculesUtilises = new ArrayList<>();
         System.out.println("\nVéhicules utilisés  Final:");
@@ -139,36 +171,58 @@ public class ReservationService {
 
         ModelView mv = new ModelView("jsonView.jsp");
         mv.addObject("vehicules", vehiculesUtilises);
-        mv.addObject("reservationsSansVehicule", reservationsSansVehicule);
-        TrajetDAO trajetDAO = new TrajetDAO();
-        AssignationDAO assignationDAO = new AssignationDAO();
-        assignationDAO.deleteAllAssignation(dateDebut, dateFin);
-        trajetDAO.deleteAllTrajets(dateDebut, dateFin);
+         mv.addObject("reservationsSansVehicule", reservationsSansVehicule);
+        // TrajetDAO trajetDAO = new TrajetDAO();
+        // AssignationDAO assignationDAO = new AssignationDAO();
+        // assignationDAO.deleteAllAssignation(dateDebut, dateFin);
+        // trajetDAO.deleteAllTrajets(dateDebut, dateFin);
 
-        for (Vehicule v : vehiculesUtilises) {
-            Trajet trajet = new Trajet();
-            trajet.setIdVehicule(v.getId());
-            trajet.setDateDepart(v.getDateDepart());
-            trajet.setDateRetour(v.getDateRetour());
-            trajet.setDistanceParcourue(v.getDistanceTotal());
-            
-            int idtrajet= trajetDAO.addTrajet(trajet);
+        // for (Vehicule v : vehiculesUtilises) {
+        // Trajet trajet = new Trajet();
+        // trajet.setIdVehicule(v.getId());
+        // trajet.setDateDepart(v.getDateDepart());
+        // trajet.setDateRetour(v.getDateRetour());
+        // trajet.setDistanceParcourue(v.getDistanceTotal());
 
-            for (Reservation r : v.getReservationsAssign()) {
-                Assignation assignation = new Assignation();
-                assignation.setIdTrajet(idtrajet);
-                assignation.setIdReservation(r.getId());
-                assignation.setNbpassager(r.getNbPassager());
+        // int idtrajet= trajetDAO.addTrajet(trajet);
 
-                assignationDAO.addAssignation(assignation);
-            }
-        }
+        // for (Reservation r : v.getReservationsAssign()) {
+        // Assignation assignation = new Assignation();
+        // assignation.setIdTrajet(idtrajet);
+        // assignation.setIdReservation(r.getId());
+        // assignation.setNbpassager(r.getNbPassager());
 
+        // assignationDAO.addAssignation(assignation);
+        // }
+        // }
 
         return mv;
     }
 
     public int getNombrePassagerTotal(List<Reservation> reservations) {
         return reservations.stream().mapToInt(Reservation::getNbPassager).sum();
+    }
+
+    private void trierReservationsParPriorite(List<Reservation> reservations) {
+        reservations.sort((r1, r2) -> {
+            if (r1.getNbPassager() != r2.getNbPassager()) {
+                return Integer.compare(r2.getNbPassager(), r1.getNbPassager());
+            }
+            return r1.getDateArrivee().compareTo(r2.getDateArrivee());
+        });
+    }
+
+    private List<Reservation> enleverReservationsEnDouble(List<Reservation> reservations) {
+        List<Reservation> resultat = new ArrayList<>();
+        List<Integer> idsVus = new ArrayList<>();
+        
+        for (Reservation r : reservations) {
+            if (!idsVus.contains(r.getId())) {
+                idsVus.add(r.getId());
+                resultat.add(r);
+            }
+        }
+        
+        return resultat;
     }
 }
