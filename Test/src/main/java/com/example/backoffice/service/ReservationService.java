@@ -134,7 +134,7 @@ public class ReservationService {
 
                     if (reservationRestante.getNombrePassager() > 0) {
                         groupeReservations.add(0, reservationRestante);
-                        groupeReservations.sort(RESERVATION_COMPARATOR);
+                        // groupeReservations.sort(RESERVATION_COMPARATOR);
                     }
 
                     return trajet;

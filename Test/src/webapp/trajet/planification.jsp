@@ -14,6 +14,8 @@
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Dark theme overrides -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dark-theme.css">
     
     <!-- Animation CSS -->
     <style>
