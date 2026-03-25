@@ -42,3 +42,8 @@ INSERT INTO distance (kilometre, id_from_hotel, id_to_hotel) VALUES
 INSERT INTO parametre (cle, valeur, type) VALUES
 ('vitesse_moyenne', '40', 'double'),
 ('temps_attente', '00:10:00', 'time');
+
+
+
+ALTER TABLE trajet
+ALTER COLUMN heure_retour DROP NOT NULL;
