@@ -4,9 +4,9 @@ setlocal enabledelayedexpansion
 REM ==========================================================
 REM === CONFIGURATION PERSONNALISABLE ========================
 REM ==========================================================
-set "JAVA_HOME=C:\Program Files\jdk-17.0.13.11-hotspot"
+set "JAVA_HOME=C:\Program Files\Java\jdk-17"
 set "PATH=%JAVA_HOME%\bin;%PATH%"
-set "CATALINA_HOME=C:\apache-tomcat-10.1.34"
+set "CATALINA_HOME=C:\Program Files\apache-tomcat-10.1.28"
 set "PROJECT_DIR=%~dp0"
 set "BUILD_DIR=%PROJECT_DIR%build"
 set "LIB=%PROJECT_DIR%lib\jakarta.servlet-api-5.0.0.jar;%PROJECT_DIR%lib\framework.jar"
@@ -57,7 +57,7 @@ mkdir "%PROJECT_BUILD%\WEB-INF\lib"
 mkdir "%PROJECT_BUILD%\WEB-INF\classes"
 
 xcopy "%PROJECT_DIR%src\webapp" "%PROJECT_BUILD%" /E /I /Y >nul
-xcopy "%PROJECT_DIR%\lib\framework.jar" "%PROJECT_BUILD%\WEB-INF\lib" /E /I /Y >nul
+xcopy "%PROJECT_DIR%\lib\*.jar" "%PROJECT_BUILD%\WEB-INF\lib" /Y >nul
 xcopy "%PROJECT_CLASSES%" "%PROJECT_BUILD%\WEB-INF\classes" /E /I /Y >nul
 
 echo.
