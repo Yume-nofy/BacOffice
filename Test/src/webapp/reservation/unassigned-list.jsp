@@ -103,7 +103,7 @@
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-4">
                     <div class="bg-white/10 p-2 rounded-lg">
-                        <i class="fas fa-ticket-alt text-2xl"></i>
+                       
                     </div>
                     <h1 class="text-xl font-bold">Réservations non assignées</h1>
                 </div>
