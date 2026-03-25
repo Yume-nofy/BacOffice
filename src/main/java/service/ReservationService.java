@@ -13,17 +13,86 @@ import dao.AssignationDAO;
 
 public class ReservationService {
 
+    // Classe interne pour retourner le résultat du traitement d'un groupe
+    private static class ResultatTraitementGroupe {
+        List<Vehicule> vehiculesUtilises;
+        List<Reservation> reservationsRestantes;
+
+        ResultatTraitementGroupe(List<Vehicule> vehiculesUtilises, List<Reservation> reservationsRestantes) {
+            this.vehiculesUtilises = vehiculesUtilises;
+            this.reservationsRestantes = reservationsRestantes;
+        }
+    }
+
     public ModelView assignerVehicule(LocalDate dateDebut, LocalDate dateFin, List<Reservation> reservations,
             List<Vehicule> vehicules, Param p) {
         List<Reservation> reservationsSansVehicule = new ArrayList<>(reservations);
         List<Reservation> reservationsAssignees = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss");
         List<Vehicule> vehicuFinal = new ArrayList<>();
-        reservations.sort(
-                Comparator.comparing(Reservation::getDateArrivee)
-                        .thenComparing(Reservation::getNbPassager, Comparator.reverseOrder()));
         double dureeDattente = p.getTemps_attente();
 
+        // Trier les réservations par date d'arrivée (plus ancienne d'abord)
+        trierReservationsParDate(reservations);
+
+        // Grouper les réservations par intervalles de temps
+        Map<LocalDateTime, List<Reservation>> groupes = grouperReservations(reservations, dureeDattente);
+
+        // Trier chaque groupe par nombre de passagers (plus grand d'abord)
+        for (List<Reservation> groupe : groupes.values()) {
+            trierGroupeParPassagers(groupe);
+        }
+
+        List<Reservation> reservationsNonAssignees = new ArrayList<>();
+        int numeroGroupe = 1;
+
+        for (Map.Entry<LocalDateTime, List<Reservation>> entry : groupes.entrySet()) {
+            LocalDateTime debutGroupe = entry.getKey();
+            List<Reservation> groupe = entry.getValue();
+
+            // Ajouter les réservations non assignées du groupe précédent
+            groupe.addAll(reservationsNonAssignees);
+            trierGroupeParPassagers(groupe);
+            reservationsNonAssignees.clear();
+
+            System.out.println("\nTraitement du groupe " + numeroGroupe + " pour " + groupe.get(0).getDateArrivee());
+
+            // Traiter le groupe et obtenir les véhicules utilisés et réservations restantes
+            ResultatTraitementGroupe resultat = traiterGroupe(groupe, vehicules, debutGroupe, dureeDattente, numeroGroupe, reservationsAssignees);
+            vehicuFinal.addAll(resultat.vehiculesUtilises);
+            reservationsNonAssignees.addAll(resultat.reservationsRestantes);
+
+            numeroGroupe++;
+        }
+
+        // Nettoyer les réservations sans véhicule
+        reservationsSansVehicule.removeAll(reservationsAssignees);
+        reservationsSansVehicule.addAll(reservationsNonAssignees);
+        reservationsSansVehicule = enleverReservationsEnDouble(reservationsSansVehicule);
+
+        // Préparer les véhicules utilisés
+        List<Vehicule> vehiculesUtilises = vehicuFinal.stream()
+                .filter(v -> v.getReservationsAssign() != null && !v.getReservationsAssign().isEmpty())
+                .collect(ArrayList::new, (list, v) -> {
+                    System.out.println("Véhicule " + v.getId() + " - Date retour : " + (v.getDateRetour() == null ? "null" : v.getDateRetour()));
+                    System.out.println(v.getReference() + " " + System.identityHashCode(v));
+                    list.add(v);
+                }, ArrayList::addAll);
+
+        ModelView mv = new ModelView("jsonView.jsp");
+        mv.addObject("vehicules", vehiculesUtilises);
+        mv.addObject("reservationsSansVehicule", reservationsSansVehicule);
+
+        return mv;
+    }
+
+    // Trier les réservations par date d'arrivée (plus ancienne d'abord)
+    private void trierReservationsParDate(List<Reservation> reservations) {
+        reservations.sort(Comparator.comparing(Reservation::getDateArrivee));
+    }
+
+    // Grouper les réservations par intervalles de temps basés sur la durée d'attente
+    private Map<LocalDateTime, List<Reservation>> grouperReservations(List<Reservation> reservations, double dureeDattente) {
         Map<LocalDateTime, List<Reservation>> groupes = new TreeMap<>();
 
         if (!reservations.isEmpty()) {
@@ -45,158 +114,87 @@ public class ReservationService {
             }
         }
 
-        for (List<Reservation> listeDuGroupe : groupes.values()) {
-            listeDuGroupe.sort((r1, r2) -> Integer.compare(r2.getNbPassager(), r1.getNbPassager()));
-        }
-        List<Reservation> nonasi = new ArrayList<>();
+        return groupes;
+    }
 
-        int k = 1;
-        for (List<Reservation> groupe : groupes.values()) {
-            if (!nonasi.isEmpty()) {
-                groupe.addAll(nonasi);
-                // System.out.println("Ajout des reservations non assignes dans le groupe  "+k);
-                // for (Reservation r : nonasi) {
-                //     System.out.println("Aucune assignation possible pour la réservation #" +
-                //             r.getId());
-                // }
-                // System.out.println("Groupe avec les nouveau reservations");
-                // for (Reservation r : groupe) {
-                //     System.out.println("Aucune assignation possible pour la réservation #" +
-                //             r.getId());
-                // }
-                nonasi.clear();
-            }
-            System.out.println("\nGroupe n " + k + " pour " + groupe.get(0).getDateArrivee());
-            // System.out.println("Groupe entre " + groupe.get(0).getDateArrivee() + " et "
-            // + groupe.get(0).getDateArrivee().plusMinutes((long) dureeDattente));
-            LocalDateTime datDepart = LocalDateTime.parse("11/11/11 11:11:11", formatter);
-            List<Vehicule> ves = new ArrayList<>();
-            List<Reservation> ress = new ArrayList<>();
-            trierReservationsParPriorite(groupe);
+    // Trier un groupe par nombre de passagers (plus grand d'abord)
+    private void trierGroupeParPassagers(List<Reservation> groupe) {
+        groupe.sort((r1, r2) -> Integer.compare(r2.getNbPassager(), r1.getNbPassager()));
+    }
 
-            for (int i = 0; i < groupe.size(); i++) {
-                System.out.println("Traitement de la réservation : " + groupe.get(i));
-                Reservation r = groupe.get(i);
-                r.setGroup(k);
-                LocalDateTime dateCleGroupe = null;
-                for (Map.Entry<LocalDateTime, List<Reservation>> entry : groupes.entrySet()) {
-                    if (entry.getValue() == groupe) {
-                        dateCleGroupe = entry.getKey();
-                        break;
-                    }
-                }
-                Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules,
-                        dateCleGroupe.plusMinutes((long) dureeDattente), ress);
-
-                if (datDepart.isBefore(r.getDateArrivee())) {
-                    datDepart = r.getDateArrivee();
-                }
-
-                if (vehiculeChoisi != null) {
-                    System.out.println("Assignation de la réservation #" + r.getId() + " au véhicule "
-                            + vehiculeChoisi.getReference() + " referenceuniqueobjet: "
-                            + System.identityHashCode(vehiculeChoisi) + " avec nombre de passager "
-                            + r.getNbPassager());
-                    // System.out.println("Avec date de retour: "+ vehiculeChoisi.getDateRetour());
-                    ves.add(vehiculeChoisi);
-                    vehicuFinal.add(vehiculeChoisi);
-                    // System.out.println(" Set group du véhicule " + vehiculeChoisi.getReference()
-                    // + " à " + k);
-                    vehiculeChoisi.setGroup(k);
-                    // System.out.println("Comparaison date de départ actuelle : " + datDepart + "
-                    // avec date de retour du véhicule " + vehiculeChoisi.getReference() + " : " +
-                    // vehiculeChoisi.getDateRetour());
-                    if (datDepart.isBefore(vehiculeChoisi.getDateRetour())) {
-                        datDepart = vehiculeChoisi.getDateRetour();
-                    }
-                    if (vehiculeChoisi.getReservationsAssign() == null) {
-                        vehiculeChoisi.setReservationsAssign(new ArrayList<>());
-                    }
-                    vehiculeChoisi.getReservationsAssign().add(r);
-
-                    groupe.remove(r);
-                    i--;
-                    vehiculeChoisi.remplirReservation(groupe, reservationsAssignees, ress);
-
-                    reservationsAssignees.add(r);
-
-                } else {
-                    nonasi.add(r);
-                }
-            }
-            // System.out.println(" Contenue de ress,( ajout dans nonasi): ");
-            for (Reservation t : ress) {
-                // System.out.println("reservation: " + t.getId()+" avec "+t.getNbPassager()+" passager");
-                nonasi.add(t);
-            }
-            ress.clear();
-            for (Vehicule v : ves) {
-                // System.out.println("Comparaison date recente du véhicule " + v.getReference()
-                // + " : " + v.getdaterecent() + " avec date de départ actuelle : " +
-                // datDepart);
-                LocalDateTime datRecent = v.getdaterecent();
-                if (datRecent.isAfter(datDepart)) {
-                    datDepart = datRecent;
-                }
-            }
-            for (Vehicule v : ves) {
-                // System.out.println("Départ du véhicule " + v.getReference() + " fixé à " +
-                // datDepart);
-                v.setDateDepart(datDepart);
-                v.getdateretourAssign();
-            }
-
-            // System.out.println("Contenue Final de Non assigne avant fin de boucle : ");
-            // for (Reservation t : nonasi) {
-            //     System.out.println(" --reservation: " + t.getId()+" avec "+t.getNbPassager()+" passager");
-            // }
-
-            k++;
-        }
-
-        reservationsSansVehicule.removeAll(reservationsAssignees);
-        reservationsSansVehicule.addAll(nonasi);
-        reservationsSansVehicule = enleverReservationsEnDouble(reservationsSansVehicule);
-
+    // Traiter un groupe de réservations
+    private ResultatTraitementGroupe traiterGroupe(List<Reservation> groupe, List<Vehicule> vehicules,
+            LocalDateTime debutGroupe, double dureeDattente, int numeroGroupe, List<Reservation> reservationsAssignees) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss");
+        LocalDateTime datDepart = LocalDateTime.parse("11/11/11 11:11:11", formatter);
         List<Vehicule> vehiculesUtilises = new ArrayList<>();
-        System.out.println("\nVéhicules utilisés  Final:");
-        for (Vehicule v : vehicuFinal) {
-            if (v.getReservationsAssign() != null && !v.getReservationsAssign().isEmpty()) {
-                System.out.println("Vehicule " + v.getId() + " - Date retour : "
-                        + (v.getDateRetour() == null ? "null" : v.getDateRetour()));
-                System.out.println(v.getReference() + " " + System.identityHashCode(v));
-                vehiculesUtilises.add(v);
+        List<Reservation> reservationsRestantes = new ArrayList<>();
+        List<Reservation> reservationsSplittees = new ArrayList<>();
+
+        for (int i = 0; i < groupe.size(); i++) {
+            Reservation r = groupe.get(i);
+            r.setGroup(numeroGroupe);
+
+            System.out.println("Traitement de la réservation : " + r);
+
+            Vehicule vehiculeChoisi = r.getVehiculeApproprie(vehicules, debutGroupe.plusMinutes((long) dureeDattente), reservationsSplittees);
+
+            if (datDepart.isBefore(r.getDateArrivee())) {
+                datDepart = r.getDateArrivee();
+            }
+
+            if (vehiculeChoisi != null) {
+                assignerReservationAuVehicule(r, vehiculeChoisi, vehiculesUtilises, reservationsAssignees, groupe, i, datDepart);
+                i--; // Ajuster l'index après suppression
+            } else {
+                reservationsRestantes.add(r);
             }
         }
 
-        ModelView mv = new ModelView("jsonView.jsp");
-        mv.addObject("vehicules", vehiculesUtilises);
-         mv.addObject("reservationsSansVehicule", reservationsSansVehicule);
-        // TrajetDAO trajetDAO = new TrajetDAO();
-        // AssignationDAO assignationDAO = new AssignationDAO();
-        // assignationDAO.deleteAllAssignation(dateDebut, dateFin);
-        // trajetDAO.deleteAllTrajets(dateDebut, dateFin);
+        // Ajouter les réservations splittees aux restantes
+        reservationsRestantes.addAll(reservationsSplittees);
 
-        // for (Vehicule v : vehiculesUtilises) {
-        // Trajet trajet = new Trajet();
-        // trajet.setIdVehicule(v.getId());
-        // trajet.setDateDepart(v.getDateDepart());
-        // trajet.setDateRetour(v.getDateRetour());
-        // trajet.setDistanceParcourue(v.getDistanceTotal());
+        // Calculer les dates de départ et retour pour les véhicules utilisés
+        calculerDatesVehicules(vehiculesUtilises, datDepart);
 
-        // int idtrajet= trajetDAO.addTrajet(trajet);
+        return new ResultatTraitementGroupe(vehiculesUtilises, reservationsRestantes);
+    }
 
-        // for (Reservation r : v.getReservationsAssign()) {
-        // Assignation assignation = new Assignation();
-        // assignation.setIdTrajet(idtrajet);
-        // assignation.setIdReservation(r.getId());
-        // assignation.setNbpassager(r.getNbPassager());
+    // Assigner une réservation à un véhicule
+    private void assignerReservationAuVehicule(Reservation r, Vehicule vehiculeChoisi, List<Vehicule> vehiculesUtilises,
+            List<Reservation> reservationsAssignees, List<Reservation> groupe, int index, LocalDateTime datDepart) {
+        System.out.println("Assignation de la réservation #" + r.getId() + " au véhicule " + vehiculeChoisi.getReference()
+                + " avec nombre de passagers " + r.getNbPassager());
 
-        // assignationDAO.addAssignation(assignation);
-        // }
-        // }
+        vehiculesUtilises.add(vehiculeChoisi);
+        vehiculeChoisi.setGroup(r.getGroup());
 
-        return mv;
+        if (datDepart.isBefore(vehiculeChoisi.getDateRetour())) {
+            datDepart = vehiculeChoisi.getDateRetour();
+        }
+
+        if (vehiculeChoisi.getReservationsAssign() == null) {
+            vehiculeChoisi.setReservationsAssign(new ArrayList<>());
+        }
+        vehiculeChoisi.getReservationsAssign().add(r);
+
+        groupe.remove(index);
+        vehiculeChoisi.remplirReservation(groupe, reservationsAssignees, new ArrayList<>());
+        reservationsAssignees.add(r);
+    }
+
+    // Calculer les dates de départ et retour pour les véhicules
+    private void calculerDatesVehicules(List<Vehicule> vehiculesUtilises, LocalDateTime datDepart) {
+        for (Vehicule v : vehiculesUtilises) {
+            LocalDateTime datRecent = v.getdaterecent();
+            if (datRecent.isAfter(datDepart)) {
+                datDepart = datRecent;
+            }
+        }
+        for (Vehicule v : vehiculesUtilises) {
+            v.setDateDepart(datDepart);
+            v.getdateretourAssign();
+        }
     }
 
     public int getNombrePassagerTotal(List<Reservation> reservations) {
