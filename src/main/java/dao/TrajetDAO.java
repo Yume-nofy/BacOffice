@@ -235,26 +235,31 @@ public class TrajetDAO {
         List<Vehicule> vehiculesDisponibles = new ArrayList<>();
 
         String sql = "SELECT v.*, vd.nombre_trajets, vd.derniere_date_retour " +
-                "FROM vehicule v " +
-                "JOIN vehicule_disponibilite vd ON v.id = vd.id " +
-                "WHERE vd.derniere_date_retour <= ? " +
-                "AND (vd.derniere_date_retour BETWEEN ? AND ? " +
-                "OR vd.derniere_date_retour = TIMESTAMP '1970-01-01 00:00:00') " +
-                "ORDER BY v.nbr_place ASC, " +
-                "CASE v.type_carburant " +
-                "    WHEN 'D' THEN 1 " +
-                "    WHEN 'Es' THEN 2 " +
-                "    WHEN 'El' THEN 3 " +
-                "    ELSE 4 " +
-                "END ASC";
+"FROM vehicule v " +
+"JOIN vehicule_disponibilite vd ON v.id = vd.id " +
+"WHERE vd.derniere_date_retour <= ? " +
+"AND (vd.derniere_date_retour BETWEEN ? AND ? " +
+"     OR vd.derniere_date_retour = TIMESTAMP '1970-01-01 00:00:00') " +
+"AND (v.heure_disponible <= ? " +
+"     OR v.heure_disponible = TIME '00:00:00') " +
+"ORDER BY v.nbr_place ASC, " +
+"CASE v.type_carburant " +
+"    WHEN 'D' THEN 1 " +
+"    WHEN 'Es' THEN 2 " +
+"    WHEN 'El' THEN 3 " +
+"    ELSE 4 " +
+"END ASC";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setTimestamp(1, Timestamp.valueOf(dateDebut));
-            ps.setTimestamp(2, Timestamp.valueOf(dateDebut));
-            ps.setTimestamp(3, Timestamp.valueOf(dateFin));
+            Timestamp debut = Timestamp.valueOf(dateDebut);
+            Timestamp fin = Timestamp.valueOf(dateFin);
 
+            ps.setTimestamp(1, debut);
+            ps.setTimestamp(2, debut);
+            ps.setTimestamp(3, fin);
+            ps.setTime(4, Time.valueOf(dateDebut.toLocalTime()));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Vehicule v = new Vehicule();

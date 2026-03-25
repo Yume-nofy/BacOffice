@@ -1,0 +1,22 @@
+vehiculeDisponible == null
+    maka vehicule disponible 
+    zaraina 2 le reservation 
+    assigner n_p capacite_vehicule
+    omena anleh groupe n_p reste
+    trier le groupe desc
+
+trouver vehicule mbola disponible
+    tri des vehicules desc
+    le plus pres nalaina
+    le min trajet
+    le diesel
+    random
+
+capacite < nombre_passager
+    le plus pres nalaina
+    zaraina 2 le reservation le plus proche 
+        - n_p: capacite_restante_vehicule
+        - n_p: reste
+    assigner n_p capacite_restante_vehicule
+    omena anleh groupe n_p reste
+    trier le groupe desc
