@@ -7,6 +7,9 @@ import com.example.backoffice.model.Vehicule;
 import com.example.backoffice.repository.VehiculeRepository;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -81,5 +84,24 @@ public class VehiculeService {
             }
         }
         return vehiculeDisponible;
+    }
+
+    public List<Vehicule> getPremiersVehicules(LocalDateTime dateHeureFin,
+        LocalDateTime dateHeureProchain) throws Exception {
+        List<Vehicule> vehicules = vehiculeRepository.getPremiersVehicules(dateHeureFin, dateHeureProchain);
+        if (vehicules == null || vehicules.isEmpty()) {
+            return null;
+        }
+        List<Vehicule> premiersVehicules = new ArrayList<>();
+        LocalTime minRetour = premiersVehicules.get(0).getHeureRetour();
+        for (Vehicule vehicule : vehicules) {
+            if (minRetour.equals(vehicule.getHeureRetour())) {
+                premiersVehicules.add(vehicule);
+            } else {
+                break;
+            }
+        }
+        premiersVehicules.sort(Comparator.comparingInt(Vehicule::getCapacite).reversed());
+        return premiersVehicules;
     }
 }

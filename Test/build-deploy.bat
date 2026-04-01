@@ -6,7 +6,7 @@ REM === CONFIGURATION PERSONNALISABLE ========================
 REM ==========================================================
 set "JAVA_HOME=C:\Program Files\Java\jdk-17"
 set "PATH=%JAVA_HOME%\bin;%PATH%"
-set "CATALINA_HOME=C:\Program Files\apache-tomcat-10.1.28"
+set "CATALINA_HOME=C:\Program Files\apache-tomcat-10.1.53"
 set "PROJECT_DIR=%~dp0"
 set "BUILD_DIR=%PROJECT_DIR%build"
 set "LIB=%PROJECT_DIR%lib\jakarta.servlet-api-5.0.0.jar;%PROJECT_DIR%lib\framework.jar"

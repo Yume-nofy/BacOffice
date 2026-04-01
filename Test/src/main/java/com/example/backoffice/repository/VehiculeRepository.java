@@ -5,6 +5,7 @@ import com.example.backoffice.model.Vehicule;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -111,5 +112,31 @@ public class VehiculeRepository {
                 Date.valueOf(date.toLocalDate()),
                 Time.valueOf(date.toLocalTime()),
                 Time.valueOf(date.toLocalTime()));
+    }
+
+    public List<Vehicule> getPremiersVehicules(LocalDateTime dateHeureFin,LocalDateTime dateHeureProchain) throws Exception {
+        String sql = """
+                    SELECT v.*
+                    FROM vehicule v
+                    WHERE 
+                        (v.heure_disponible IS NULL OR v.heure_disponible BETWEEN ? AND ?)
+                        AND (
+                            NOT EXISTS (SELECT 1 FROM trajet t WHERE t.id_vehicule = v.id)
+                            OR 
+                            (SELECT MAX(t.heure_retour) FROM trajet t WHERE t.id_vehicule = v.id) BETWEEN ? AND ?
+                        )
+                    ORDER BY v.capacite DESC
+                """;
+        Timestamp fin = Timestamp.valueOf(dateHeureFin);
+        Timestamp prochain = Timestamp.valueOf(dateHeureProchain);
+
+        return dao.getList(
+                sql,
+                Vehicule.class,
+                fin,       
+                prochain,  
+                fin,       
+                prochain   
+        );
     }
 }

@@ -13,7 +13,7 @@ echo ================================
 echo   Starting Apache Tomcat
 echo ================================
 
-cd /d "C:\Program Files\apache-tomcat-10.1.28\bin"
+cd /d "C:\Program Files\apache-tomcat-10.1.53\bin"
 
 startup.bat
 

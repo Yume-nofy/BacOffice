@@ -9,6 +9,7 @@ public class Reservation {
     private Integer nombrePassager;
     private LocalDateTime dateArrivee;
     private Hotel hotel;
+    private boolean nonassigne= false; 
 
     public Reservation() {
     }
@@ -19,6 +20,7 @@ public class Reservation {
         this.nombrePassager = nombrePassager;
         this.dateArrivee = dateArrivee;
         this.hotel = hotel;
+        this.nonassigne = false;
     }
 
     public Integer getId() {
@@ -59,5 +61,13 @@ public class Reservation {
 
     public void setHotel(Hotel hotel) {
         this.hotel = hotel;
+    }
+
+    public boolean getNonAssigne() {
+        return this.nonassigne;
+    }
+
+    public void setNonassigne(boolean nonassigne) {
+        this.nonassigne = nonassigne;
     }
 }

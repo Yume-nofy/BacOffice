@@ -10,6 +10,15 @@ public class Vehicule {
     private Integer capaciteRestante;
     private TypeCarburant typeCarburant;
     private LocalTime heureDisponible;
+    private LocalTime heureRetour;
+
+    public LocalTime getHeureRetour() {
+        return heureRetour;
+    }
+
+    public void setHeureRetour(LocalTime heureRetour) {
+        this.heureRetour = heureRetour;
+    }
 
     public Vehicule() {
     }
