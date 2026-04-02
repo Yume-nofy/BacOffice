@@ -5,7 +5,6 @@ import com.example.backoffice.model.Vehicule;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -77,11 +76,14 @@ public class VehiculeRepository {
         return dao.get(sql, Long.class, idVehicule).intValue();
     }
 
-    public LocalTime getHeureRetour(Integer idVehicule) throws Exception {
+    public LocalTime getHeureRetour(Vehicule vehicule) throws Exception {
         String sql = """
                 SELECT MAX(heure_retour) FROM trajet WHERE id_vehicule = ?
                 """;
-        return dao.get(sql, LocalTime.class, idVehicule);
+        LocalTime heureRetour = dao.get(sql, LocalTime.class, vehicule.getId());
+        if (heureRetour == null)
+            return vehicule.getHeureDisponible();
+        return heureRetour;
     }
 
     public List<Vehicule> getVehiculeDisponible(LocalDateTime date) throws Exception {
@@ -114,29 +116,33 @@ public class VehiculeRepository {
                 Time.valueOf(date.toLocalTime()));
     }
 
-    public List<Vehicule> getPremiersVehicules(LocalDateTime dateHeureFin,LocalDateTime dateHeureProchain) throws Exception {
+    public List<Vehicule> getPremiersVehicules(LocalDateTime dateHeureFin,
+            LocalDateTime dateHeureProchain) throws Exception {
         String sql = """
-                    SELECT v.*
+                    SELECT
+                        v.*
                     FROM vehicule v
-                    WHERE 
-                        (v.heure_disponible IS NULL OR v.heure_disponible BETWEEN ? AND ?)
-                        AND (
-                            NOT EXISTS (SELECT 1 FROM trajet t WHERE t.id_vehicule = v.id)
-                            OR 
-                            (SELECT MAX(t.heure_retour) FROM trajet t WHERE t.id_vehicule = v.id) BETWEEN ? AND ?
+                    LEFT JOIN trajet t ON t.id_vehicule = v.id
+                    AND t.date_trajet = ?
+                    GROUP BY v.id, v.reference, v.capacite, v.heure_disponible
+                    HAVING (
+                        MAX(t.heure_retour) IS NULL AND (
+                            v.heure_disponible IS NULL
+                            OR (v.heure_disponible <= ? AND v.heure_disponible > ?)
                         )
-                    ORDER BY v.capacite DESC
+                    ) OR (
+                        MAX(t.heure_retour) IS NOT NULL AND
+                        MAX(t.heure_retour) BETWEEN ? AND ?
+                    )
+                    ORDER BY MAX(t.heure_retour)
                 """;
-        Timestamp fin = Timestamp.valueOf(dateHeureFin);
-        Timestamp prochain = Timestamp.valueOf(dateHeureProchain);
-
         return dao.getList(
                 sql,
                 Vehicule.class,
-                fin,       
-                prochain,  
-                fin,       
-                prochain   
-        );
+                Date.valueOf(dateHeureFin.toLocalDate()),
+                Time.valueOf(dateHeureFin.toLocalTime()),
+                Time.valueOf(dateHeureProchain.toLocalTime()),
+                Time.valueOf(dateHeureFin.toLocalTime()),
+                Time.valueOf(dateHeureProchain.toLocalTime()));
     }
 }

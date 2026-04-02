@@ -1,6 +1,7 @@
 package com.example.backoffice.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.example.backoffice.model.Hotel;
 import com.example.backoffice.model.Reservation;
@@ -27,6 +28,8 @@ public class TrajetService {
     private final VehiculeRepository vehiculeRepository;
     private final ReservationRepository reservationRepository;
     private final DistanceService distanceService;
+    private final VehiculeService vehiculeService;
+    private final TrajetReservationService trajetReservationService;
 
     public TrajetService(DAO dao) {
         this.trajetRepository = new TrajetRepository(dao);
@@ -35,6 +38,8 @@ public class TrajetService {
         this.vehiculeRepository = new VehiculeRepository(dao);
         this.reservationRepository = new ReservationRepository(dao);
         this.distanceService = new DistanceService(dao);
+        this.vehiculeService = new VehiculeService(dao);
+        this.trajetReservationService = new TrajetReservationService(dao);
     }
 
     public void save(Trajet trajet) throws Exception {
@@ -72,7 +77,7 @@ public class TrajetService {
 
         LocalTime heureDepart = assignees.get(0).getDateArrivee().toLocalTime();
         for (Trajet trajet : trajets) {
-            LocalTime heureRetour = vehiculeRepository.getHeureRetour(trajet.getVehicule().getId());
+            LocalTime heureRetour = vehiculeRepository.getHeureRetour(trajet.getVehicule());
 
             if (heureRetour != null && !heureRetour.isBefore(heureDepart)) {
                 heureDepart = heureRetour;
@@ -128,12 +133,18 @@ public class TrajetService {
     }
 
     public void preparerTrajet(List<Reservation> assignees, List<Trajet> trajets) throws Exception {
+        System.out.println("preparation: ");
         LocalTime heureDepart = getHeureDepart(assignees, trajets);
         for (Trajet trajet : trajets) {
-            trajet.setHeureDepart(heureDepart);
-            calculerItineraire(trajet);
-            save(trajet);
+            System.out.println("T" + trajet.getId() + " " + trajet.getVehicule().getReference());
+            preparerTrajet(trajet, heureDepart);
         }
+    }
+
+    public void preparerTrajet(Trajet trajet, LocalTime heureDepart) throws Exception {
+        trajet.setHeureDepart(heureDepart);
+        calculerItineraire(trajet);
+        save(trajet);
     }
 
     public Trajet creerTrajet(Reservation reservation, Vehicule vehicule) throws Exception {
@@ -144,4 +155,53 @@ public class TrajetService {
         return trajet;
     }
 
+    public Trajet traiterRetourVehicule(List<Reservation> nonAssignees, List<Reservation> assignees,
+            LocalDateTime dateHeureFin, LocalDateTime dateHeureProchain) throws Exception {
+
+        if (nonAssignees == null || nonAssignees.isEmpty()) {
+            return null;
+        }
+
+        // Trier nonAssignees par nombrePassager décroissante puis par dateArrivee
+        nonAssignees.sort(Comparator.comparingInt(Reservation::getNombrePassager)
+                .reversed()
+                .thenComparing(Reservation::getDateArrivee));
+
+        List<Vehicule> vehicules = vehiculeService.getPremiersVehicules(dateHeureFin, dateHeureProchain);
+
+        if (vehicules == null || vehicules.isEmpty()) {
+            return null;
+        }
+
+        for (int i = 0; i < nonAssignees.size(); i++) {
+            if (!assignees.contains(nonAssignees.get(i))) {
+            Vehicule vehicule = vehiculeService.getRetourVehicule(vehicules, nonAssignees.get(i).getNombrePassager());
+            if (vehicule == null) {
+
+                System.out.println("Aucun véhicule de retour disponible pour réservation id=" + nonAssignees.get(i).getId());
+                break; 
+            }
+            if(vehicule.getCapaciteRestante()<nonAssignees.get(i).getNombrePassager()) {
+                Reservation restante=trajetReservationService.diviserReservation(nonAssignees.get(i),vehicule.getCapaciteRestante());
+                nonAssignees.add(0,restante); 
+                i=0;
+                }
+
+                Trajet trajet = creerTrajet(nonAssignees.get(i), vehicule);
+                trajetReservationService.assigner(nonAssignees.get(i), vehicule, assignees, trajet);
+                trajetReservationService.remplirVehicule(nonAssignees, assignees, trajet);
+
+                LocalTime heureDepart = vehiculeRepository.getHeureRetour(vehicule);
+
+                if (vehicule.getCapaciteRestante() > 0) {
+                    trajet.setHeureDepart(heureDepart);
+                    return trajet;
+                } else {
+                    preparerTrajet(trajet, heureDepart);
+                }
+            }
+        }
+
+        return null;
+    }
 }

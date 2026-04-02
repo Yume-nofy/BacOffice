@@ -47,22 +47,25 @@ public class TrajetReservationService {
                     // sprint-7
                     Reservation reservationProche = getPlusProche(trajet.getVehicule(), groupeReservations, assignees);
                     if (reservationProche != null) {
-                        Reservation reservationRestante = diviserReservation(reservationProche,
-                                trajet.getVehicule().getCapaciteRestante());
+                        if (reservationProche.getNombrePassager() > trajet.getVehicule().getCapaciteRestante()) {
+                            Reservation reservationRestante = diviserReservation(reservationProche,
+                                    trajet.getVehicule().getCapaciteRestante());
 
+                            if (reservationRestante.getNombrePassager() > 0) {
+                                groupeReservations.add(0, reservationRestante);
+                                groupeReservations.sort(
+                                        Comparator.comparingInt(Reservation::getNombrePassager)
+                                                .reversed()
+                                                .thenComparing(Reservation::getDateArrivee));
+                                i = 0;
+                            }
+                        }
+                        
                         TrajetReservation trajetReservation = creerTrajetReservation(reservationProche, trajet);
                         trajetReservations.add(trajetReservation);
 
                         trajet.getVehicule().diminuerCapaciteRestante(reservationProche.getNombrePassager());
                         assignees.add(reservationProche);
-
-                        if (reservationRestante.getNombrePassager() > 0) {
-                            groupeReservations.add(0, reservationRestante);
-                            groupeReservations.sort(
-                                    Comparator.comparingInt(Reservation::getNombrePassager)
-                                            .reversed()
-                                            .thenComparing(Reservation::getDateArrivee));
-                        }
                     }
                 }
             }
@@ -96,6 +99,10 @@ public class TrajetReservationService {
                 if (Math.abs(vehicule.getCapaciteRestante() - reservations.get(i).getNombrePassager()) < min) {
                     index = i;
                 }
+                if (Math.abs(vehicule.getCapaciteRestante() - reservations.get(i).getNombrePassager()) == min
+                        && reservations.get(i).getNombrePassager() > reservations.get(index).getNombrePassager()) {
+                    index = i;
+                }
             }
         }
         if (index == -1)
@@ -111,4 +118,15 @@ public class TrajetReservationService {
         trajetReservationRepository.save(trajetReservation);
         return trajetReservation;
     }
+
+    public void assigner(Reservation reservation, Vehicule vehicule,
+            List<Reservation> assignees, Trajet trajet) throws Exception {
+
+        creerTrajetReservation(reservation, trajet);
+        assignees.add(reservation);
+
+        trajet.getVehicule().diminuerCapaciteRestante(reservation.getNombrePassager());
+
+    }
+
 }
