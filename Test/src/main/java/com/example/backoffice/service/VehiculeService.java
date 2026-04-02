@@ -60,7 +60,67 @@ public class VehiculeService {
         return getMeilleurVehicule(vehicules);
     }
 
-    public Vehicule getMeilleurVehicule(List<Vehicule> vehicules) throws Exception {
+    public Vehicule getRetourVehicule(List<Vehicule> vehicules, int nombrePassager) throws Exception {
+        Vehicule vehiculeResultat = null;
+
+        // Filtrer les véhicules capables de prendre tous les passagers
+        List<Vehicule> fullFit = new ArrayList<>();
+        for (Vehicule v : vehicules) {
+            if (v.getCapaciteRestante() >= nombrePassager) {
+                fullFit.add(v);
+            }
+        }
+
+        // Trier par capaciteRestante croissante
+        fullFit.sort(Comparator.comparingInt(Vehicule::getCapaciteRestante));
+
+        if (!fullFit.isEmpty()) {
+            vehiculeResultat = getMeilleurVehicule(fullFit);
+        } else {
+            // Filtrer les véhicules partiellement adaptés
+            List<Vehicule> partialFit = new ArrayList<>();
+            for (Vehicule v : vehicules) {
+                if (v.getCapaciteRestante() < nombrePassager && v.getCapaciteRestante() > 0) {
+                    partialFit.add(v);
+                }
+            }
+
+            // Trier par capaciteRestante décroissante
+            partialFit.sort(Comparator.comparingInt(Vehicule::getCapaciteRestante).reversed());
+
+            if (!partialFit.isEmpty()) {
+                vehiculeResultat = getMeilleurVehicule(partialFit);
+            }
+        }
+
+        return vehiculeResultat;
+    }
+
+    public List<Vehicule> getPremiersVehicules(LocalDateTime dateHeureFin, LocalDateTime dateHeureProchain)
+            throws Exception {
+        List<Vehicule> vehicules = vehiculeRepository.getPremiersVehicules(dateHeureFin, dateHeureProchain);
+
+        if (vehicules == null || vehicules.isEmpty()) {
+            return null;
+        }
+
+        List<Vehicule> premiersVehicules = new ArrayList<>();
+
+        LocalTime minRetour = vehiculeRepository.getHeureRetour(vehicules.get(0));
+
+        for (int i = 0; i < vehicules.size(); i++) {
+            LocalTime heureRetour = vehiculeRepository.getHeureRetour(vehicules.get(i));
+            if (minRetour.equals(heureRetour)) {
+                premiersVehicules.add(vehicules.get(i));
+            } else {
+                break;
+            }
+        }
+
+        return premiersVehicules;
+    }
+
+    private Vehicule getMeilleurVehicule(List<Vehicule> vehicules) throws Exception {
         Vehicule vehiculeDisponible = vehicules.get(0);
         for (Vehicule vehicule : vehicules) {
             if (vehicule.getCapacite() > vehiculeDisponible.getCapacite()) {
@@ -77,31 +137,12 @@ public class VehiculeService {
                             int index = random.nextInt(1);
                             if (index == 0)
                                 vehiculeDisponible = vehicule;
-                        } 
+                        }
                         vehiculeDisponible = vehicule;
                     }
                 }
             }
         }
         return vehiculeDisponible;
-    }
-
-    public List<Vehicule> getPremiersVehicules(LocalDateTime dateHeureFin,
-        LocalDateTime dateHeureProchain) throws Exception {
-        List<Vehicule> vehicules = vehiculeRepository.getPremiersVehicules(dateHeureFin, dateHeureProchain);
-        if (vehicules == null || vehicules.isEmpty()) {
-            return null;
-        }
-        List<Vehicule> premiersVehicules = new ArrayList<>();
-        LocalTime minRetour = premiersVehicules.get(0).getHeureRetour();
-        for (Vehicule vehicule : vehicules) {
-            if (minRetour.equals(vehicule.getHeureRetour())) {
-                premiersVehicules.add(vehicule);
-            } else {
-                break;
-            }
-        }
-        premiersVehicules.sort(Comparator.comparingInt(Vehicule::getCapacite).reversed());
-        return premiersVehicules;
     }
 }

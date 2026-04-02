@@ -8,7 +8,7 @@ public class GroupeReservation {
     private LocalDateTime dateHeureDebut;
     private LocalDateTime dateHeureFin;
     private LocalDateTime dateHeureProchain;
-
+    
     public GroupeReservation(List<Reservation> reservations, LocalDateTime dateHeureDebut, LocalDateTime dateHeureFin,
             LocalDateTime dateHeureProchain) {
         this.reservations = reservations;
@@ -41,7 +41,5 @@ public class GroupeReservation {
     public void setDateHeureProchain(LocalDateTime dateHeureProchain) {
         this.dateHeureProchain = dateHeureProchain;
     }
-    
 
-    
 }
