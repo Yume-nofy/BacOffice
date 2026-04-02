@@ -185,20 +185,26 @@ public class Vehicule {
         List<LocalDateTime> sortedList = new ArrayList<>();
         LieuDAO la = new LieuDAO();
 
-        Lieu l1 = la.getLieuById(this.reservationsAssign.get(0).getIdHotel());
-        int i = 0;
-        for (Reservation r : this.reservationsAssign) {
-            // System.out.println("resercvation :" + r.getIdHotel());
+        if (this.reservationsAssign == null || this.reservationsAssign.isEmpty()) {
+            this.retourListDate = sortedList;
+            return;
+        }
 
+        Lieu l1 = la.getLieuById(this.reservationsAssign.get(0).getIdHotel());
+        int dateIndex = 0;
+
+        for (Reservation r : this.reservationsAssign) {
             if (l1.getId() == r.getIdHotel()) {
-                sortedList.add(retourListDate.get(i));
+                sortedList.add(retourListDate.get(dateIndex));
             } else {
-                i++;
-                sortedList.add(retourListDate.get(i));
-                l1 = la.getLieuById(r.getIdHotel());
-                System.out.println(" i  ++ ");
+                dateIndex++;
+                if (dateIndex < retourListDate.size()) {
+                    sortedList.add(retourListDate.get(dateIndex));
+                    l1 = la.getLieuById(r.getIdHotel());
+                }
             }
         }
+
         this.retourListDate = sortedList;
     }
 
@@ -212,9 +218,9 @@ public class Vehicule {
                 }
             }
         }
-        if (this.getDateDepart()!=null) {
+        if (this.getDateDepart() != null) {
             if (this.getDateDepart().isAfter(recent)) {
-                recent= this.getDateDepart();
+                recent = this.getDateDepart();
             }
         }
 
@@ -222,13 +228,15 @@ public class Vehicule {
     }
 
     public LocalDateTime getdateretourAssign() {
-        // System.out.println("Calcul du date de retour pour le véhicule " + this.getReference());
+        // System.out.println("Calcul du date de retour pour le véhicule " +
+        // this.getReference());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss");
         LocalDateTime defaultDate = LocalDateTime.parse("11/11/11 11:11:11", formatter);
 
         if (reservationsAssign == null || reservationsAssign.isEmpty()) {
-            // System.out.println("Aucune réservation assignée au véhicule " + this.getReference()
-            //         + ". Retour de la date par défaut : " + defaultDate);
+            // System.out.println("Aucune réservation assignée au véhicule " +
+            // this.getReference()
+            // + ". Retour de la date par défaut : " + defaultDate);
             return defaultDate;
         }
 
@@ -242,7 +250,8 @@ public class Vehicule {
         Lieu aeroportLieu = lieuDAO.getLieuById(idAeroport);
 
         if (aeroportLieu == null) {
-            // System.out.println("Lieu de l'aéroport introuvable. Retour de la date par défaut : " + defaultDate);
+            // System.out.println("Lieu de l'aéroport introuvable. Retour de la date par
+            // défaut : " + defaultDate);
             return defaultDate;
         }
 
@@ -265,8 +274,9 @@ public class Vehicule {
         }
 
         if (lieuDisponibles.isEmpty()) {
-            // System.out.println("Aucun lieu disponible pour les réservations assignées au véhicule "
-            //         + this.getReference() + ". Retour de la date par défaut : " + defaultDate);
+            // System.out.println("Aucun lieu disponible pour les réservations assignées au
+            // véhicule "
+            // + this.getReference() + ". Retour de la date par défaut : " + defaultDate);
             return defaultDate;
         }
 
@@ -312,8 +322,9 @@ public class Vehicule {
         }
 
         if (dernierLieu == null) {
-            // System.out.println("Aucun lieu n'a pu être visité pour les réservations assignées au véhicule "
-            //         + this.getReference() + ". Retour de la date par défaut : " + defaultDate);
+            // System.out.println("Aucun lieu n'a pu être visité pour les réservations
+            // assignées au véhicule "
+            // + this.getReference() + ". Retour de la date par défaut : " + defaultDate);
             return defaultDate;
         }
 
@@ -345,23 +356,31 @@ public class Vehicule {
         setDistanceTotal(distanceTotalValue);
         setRetourListDate(datRet);
         setDateDepart(dateDeparte);
-        // System.out.println("Date de départ pour le véhicule " + this.getReference() + " : " + dateDeparte);
+        // System.out.println("Date de départ pour le véhicule " + this.getReference() +
+        // " : " + dateDeparte);
         LocalDateTime dateRetourValue = dateDeparte.plusMinutes(totalTemps);
         setDateRetour(dateRetourValue);
-        // System.out.println("Date de retour calculée pour le véhicule " + this.getReference() + " : " + dateRetourValue);
+        // System.out.println("Date de retour calculée pour le véhicule " +
+        // this.getReference() + " : " + dateRetourValue);
         return dateRetourValue;
     }
 
-    public void remplirReservation(List<Reservation> reservations, List<Reservation> reservationsAssignees) {
+    public void remplirReservation(List<Reservation> reservations, List<Reservation> reservationsAssignees,  List<Reservation> ress) {
         for (int i = 0; i < reservations.size(); i++) {
             Reservation r = reservations.get(i);
-            // System.out.println("Vérification de la réservation #" + r.getId() + " avec " + r.getNbPassager()
-            //         + " passagers à " + r.getDateArrivee());
-            // System.out.println("Nombre de places disponibles dans le véhicule " + this.getReference() + " : "
-            //         + this.getNbrPlaceDisponible());
+            System.out.println("Vérification de la réservation #" + r.getId() + " avec "
+            + r.getNbPassager()
+            + " passagers à " + r.getDateArrivee());
+            System.out.println("Nombre de places disponibles dans le véhicule " +
+            this.getReference() + " : "
+            + this.getNbrPlaceDisponible());
+            
+
             if (this.getNbrPlaceDisponible() >= r.getNbPassager()) {
-                // System.out.println("Ajout de la reservation #" + r.getId() + " avec " + r.getNbPassager()
-                //         + " passagers à " + r.getDateArrivee() + " dans le véhicule " + this.getReference());
+                System.out.println("Ajout de la reservation #" + r.getId() + " avec " +
+                r.getNbPassager()
+                + " passagers à " + r.getDateArrivee() + " dans le véhicule " +
+                this.getReference());
                 this.reservationsAssign.add(r);
                 reservationsAssignees.add(r);
                 i--;
@@ -369,7 +388,31 @@ public class Vehicule {
 
                 reservations.remove(r);
 
+            } else if(this.getNbrPlaceDisponible() != 0) {
+                Reservation newre = new Reservation();
+                newre.setId(r.getId());
+                newre.setDateArrivee(r.getDateArrivee());
+                newre.setNbPassager(r.getNbPassager() - this.getNbrPlaceDisponible());
+                newre.setIdHotel(r.getIdHotel());
+                newre.setIdClient(r.getIdClient());
+                newre.setGroup(r.getGroup());
+                newre.setNomHotel(r.getNomHotel());
+
+                r.setNbPassager(this.getNbrPlaceDisponible());
+                // System.out.println("Ajout de la reservation #" + r.getId() + " avec " +
+                // r.getNbPassager()
+                // + " passagers à " + r.getDateArrivee() + " dans le véhicule " +
+                // this.getReference());
+                this.reservationsAssign.add(r);
+                reservationsAssignees.add(r);
+                i--;
+                reservations.remove(r);
+                ress.add(newre);
+
+                System.out.println("Création d'une réservation partielle : " + newre);
+                System.out.println("Avec vehicule "+ this.getId()+" ");
             }
+
         }
     }
 

@@ -1,0 +1,263 @@
+package com.example.backoffice.dao;
+
+import java.lang.reflect.*;
+import java.sql.*;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
+
+public class DAO {
+
+    private final String URL = "jdbc:postgresql://localhost:5432/AeroAssign";
+    private final String USER = "postgres";
+    private final String PASSWORD = "root";
+    private Connection connection;
+
+    {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("PostgreSQL Driver not found!", e);
+        }
+    }
+
+    public void connect() throws SQLException {
+        connection = DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void close() throws Exception {
+        if (connection != null)
+            connection.close();
+    }
+
+    private String sqlToJava(String columnName) {
+        StringBuilder sb = new StringBuilder();
+        boolean upperNext = false;
+        for (char c : columnName.toCharArray()) {
+            if (c == '_') {
+                upperNext = true;
+            } else {
+                sb.append(upperNext ? Character.toUpperCase(c) : Character.toLowerCase(c));
+                upperNext = false;
+            }
+        }
+        return sb.toString();
+    }
+
+    private String javaToSql(String fieldName) {
+        StringBuilder sb = new StringBuilder();
+        int i = 1;
+        for (char c : fieldName.toCharArray()) {
+            if (i != 1 && Character.isUpperCase(c)) {
+                sb.append('_').append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+            i++;
+        }
+        return sb.toString();
+    }
+
+    public int executeUpdate(String sql, Object... params) throws Exception {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (int i = 0; i < params.length; i++) {
+                assign(i + 1, stmt, params[i]);
+            }
+
+            stmt.executeUpdate();
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                    return -1;
+                }
+            }
+        }
+    }
+
+    public <T> T get(String sql, Class<T> clazz, Object... params) throws Exception {
+        if (isSimpleType(clazz)) {
+            try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
+
+                for (int i = 0; i < params.length; i++) {
+                    assign(i+ 1, stmt, params[i]);
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        Object value = rs.getObject(1);
+
+                        if(value == null) return null;
+
+                        if (value instanceof java.math.BigDecimal && clazz.equals(Double.class)) {
+                            return clazz.cast(((java.math.BigDecimal) value).doubleValue());
+                        }
+
+                        if (value instanceof Time && clazz.equals(LocalTime.class)) {
+                            return clazz.cast(((Time) value).toLocalTime());
+                        }
+
+                        if (value instanceof Timestamp && clazz.equals(LocalDateTime.class)) {
+                            return clazz.cast(((Timestamp) value).toLocalDateTime());
+                        }
+
+                        if (value instanceof Date && clazz.equals(LocalDate.class)) {
+                            return clazz.cast(((Date) value).toLocalDate());
+                        }
+
+
+                        return clazz.cast(value);
+                    }
+                }
+            }
+            return null;
+        }
+        List<T> list = getList(sql, clazz, params);
+        if (list.isEmpty())
+            return null;
+        return list.get(0);
+    }
+
+    public <T> List<T> getList(String sql, Class<T> clazz, Object... params) throws Exception {
+        List<T> resultList = new ArrayList<>();
+
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
+
+            for (int i = 0; i < params.length; i++) {
+                assign(i + 1, stmt, params[i]);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+
+                ResultSetMetaData meta = rs.getMetaData();
+                int colCount = meta.getColumnCount();
+
+                while (rs.next()) {
+                    T obj = clazz.getDeclaredConstructor().newInstance();
+
+                    for (int i = 1; i <= colCount; i++) {
+                        String colName = meta.getColumnLabel(i);
+                        Object value = rs.getObject(i);
+                        try {
+                            mapField(obj, colName, value);
+                        } catch (Exception e) {
+                        }
+                    }
+
+                    mapNestedObjectsLazy(obj, rs);
+
+                    resultList.add(obj);
+                }
+            }
+        }
+
+        return resultList;
+    }
+
+    private void mapField(Object obj, String columnName, Object value) throws Exception {
+        String fieldName = sqlToJava(columnName);
+        try {
+            Field field = obj.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            assignValue(obj, field, value);
+        } catch (NoSuchFieldException ignored) {
+        }
+    }
+
+    private void assignValue(Object obj, Field field, Object value) throws IllegalAccessException {
+        if (value == null)
+            return;
+
+        if (value instanceof Timestamp && field.getType().equals(LocalDateTime.class)) {
+            field.set(obj, ((Timestamp) value).toLocalDateTime());
+        }
+
+        else if (value instanceof Long && field.getType().equals(Integer.class)) {
+            field.set(obj, ((Long) value).intValue());
+        }
+
+        else if (value instanceof Date && field.getType().equals(LocalDate.class)) {
+            field.set(obj, ((Date) value).toLocalDate());
+        }
+
+        else if (value instanceof Time && field.getType().equals(LocalTime.class)) {
+            field.set(obj, ((Time) value).toLocalTime());
+        }
+
+        else if (value instanceof java.math.BigDecimal && field.getType().equals(Double.class)) {
+            field.set(obj, ((java.math.BigDecimal) value).doubleValue());
+        }
+
+        else if (value instanceof java.math.BigDecimal && field.getType().equals(Integer.class)) {
+            field.set(obj, ((java.math.BigDecimal) value).intValue());
+        }
+
+        else {
+            field.set(obj, value);
+        }
+    }
+
+    private void assign(Integer index, PreparedStatement stmt, Object param) throws Exception {
+        if (param == null)
+            stmt.setObject(index, null);;
+
+        if (param instanceof java.time.LocalDate) {
+            stmt.setDate(index, Date.valueOf((java.time.LocalDate) param));
+        } else if (param instanceof java.time.LocalTime) {
+            stmt.setTime(index, Time.valueOf((java.time.LocalTime) param));
+        } else if (param instanceof java.time.LocalDateTime) {
+            stmt.setTimestamp(index, Timestamp.valueOf((java.time.LocalDateTime) param));
+        } else {
+            stmt.setObject(index, param);
+        }
+    }
+
+    private boolean isSimpleType(Class<?> clazz) {
+        return clazz.isPrimitive()
+                || clazz == String.class
+                || Number.class.isAssignableFrom(clazz)
+                || clazz == Boolean.class
+                || clazz == LocalDateTime.class
+                || clazz == LocalDate.class
+                || clazz == LocalTime.class
+                || clazz == Timestamp.class
+                || clazz == Time.class
+                || clazz == Date.class
+                || clazz == java.util.Date.class;
+    }
+
+    private void mapNestedObjectsLazy(Object parent, ResultSet rs) throws Exception {
+        for (Field field : parent.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            Class<?> type = field.getType();
+            if (isSimpleType(type))
+                continue;
+
+            String table = javaToSql(type.getSimpleName()).toLowerCase();
+            String idColumn = "id_" + javaToSql(field.getName());
+            Object idValue;
+            try {
+                idValue = rs.getObject(idColumn);
+            } catch (SQLException e) {
+                continue;
+            }
+
+            if (idValue != null) {
+                String sql = "SELECT * FROM " + table + " WHERE id = ?";
+                Object nestedObj = get(sql, type, idValue);
+                if (nestedObj != null) {
+                    field.set(parent, nestedObj);
+                }
+            }
+        }
+    }
+
+}
