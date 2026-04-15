@@ -1,0 +1,88 @@
+BackEnd 
+	framework 
+	be fe 
+
+FrontEnd 
+	spring 
+	be spring boot 
+	fe spring mvc 
+	fe vue ou react
+
+branche 2 repo 2    	
+	 deploiement en ligne 
+	backoffice tous est proteger 
+	front tous est public 
+	
+mise en place de l environnement 
+	front backend 
+	deploiement 
+	hello word 
+	dependance 
+
+Branche BackOffice 		BrancheFront Office 
+Features 	
+clone request
+merge request 
+
+librairie 
+sql .sql 
+deploiement de release ,, main clone feature , mrege request tl , clone staging fix merge staging cherry pick main clone release env prod , fix merge  cherry pick
+
+creer branche :
+sprint/0/1-AddingReadme 
+
+ajout de readme 
+creer branche tl 
+clne developpeur 
+ readme du projet de test de
+
+commit - create pull reaquest  - merge reaquest 
+ 
+reservation voiture , tour operateur 
+izahay olona 5 ao amin hotel colber no mipetraka tonga amin vol 2
+izahay olona 2 ao amin hotal  amin vol 2 no madeh 
+tour operateur manana vehicule 
+code review 
+geston de assignatio optimiser , pour planification de assignation vehicule , par rapport reservaiton de hotel
+
+staging/sprint/1/1-ListeReservation
+fix/sprint/1/1-InsertReservation
+
+staging/sprint/1/1-InsertReservation
+tsy maintsy supprimena  ny brahce de depart du dev : 
+
+creer fix/sprint/0/1-AddingReadme a partir de stagiung 
+modifier , merge dans pull request dans staging c est les commits du fix qu on fait 
+
+script de creation de base de donne repertoire script avec sous repertoire date 
+
+///////////////////////////
+
+reervation : ity client ray ity dia izao no isany tonga amizao daty zao aminizao ora amin n y hotel otrizao 
+
+en paralelle voiture : quanpacite , id ( ex: 11 passager ) type de carburant : diesel ou essence 
+Parametre: 20 km / h vitesse moyene du voiture , temps d attente accepte 
+
+meme date pour le temps d attente donc meme reservation , 
+
+assignation de voiture 
+regroupement , assignation de voiture : regle de gestion , le client ne peu pas etre diviser , meme destination 
+
+par rapport au configuration on fait ce sont les voitures avec 
+izay meme 
+voiture fait ceci ,,
+
+voiture ceci : 
+
+///////////////////////////06/02/2026  
+
+sprint 1 :
+hotel : 
+id , nom 
+reservation : 
+ id , idclient ( 4 chiffre ) avec lettre et/ou nombre , nbPassager , dateHeure (arrive) , idHotel  
+
+backOffice formulaire insertion reservation ( pas encore proteger ) ,script insertion hotel ,
+frontOffice liste Reservation , filtre(recherche) par date, front office et backoffice une seule backend (base de donnee) 
+
+utiliser json pour la discussion api du frront office 

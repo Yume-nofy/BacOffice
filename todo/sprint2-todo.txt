@@ -1,0 +1,24 @@
+Team lead : 3294
+Dev : 3313 , 3305
+
+backoffice
+brache sprint/2/1-VehiculeCRUD
+ 	creer script create vehicule
+	id, reference, typeCarburant ( D diesel , Es essence , El elecrtique ),nbrPlace
+	(back office fotsin )
+	creer controlller model et jsp 
+		insertion vehicule
+
+brache sprint/2/2-TokenMain
+	creer script create table token
+	token  ( id , token , date expiration ( avec heure) )
+	main pour remplir table token ( date efa lasa , ho avy ) 
+	
+brache sprint/2/3-SecurisationReservation
+	protection appel api
+	back office verification de token dans  url 
+
+frontoffice
+brache sprint/2/1-TokenConfiguration
+	stocker dans un fichier de configuration du front office 
+	le token 

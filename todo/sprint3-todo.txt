@@ -1,0 +1,39 @@
+Team lead : 3313
+Dev : 3305 , 3294
+
+backoffice
+brache sprint/3/1-ParamLieuDistance
+ 	creer script create update Hotel en Lieu
+	 
+	creer script createa table 
+	parametre
+		Vitesse Moyenne 30 ( km/h)
+		Tempsd'Attente 30 mn
+	Lieu :
+		id code libelle 
+		1 TNR   Ivato Aeroport
+		2
+	Distance 
+		id from to kilometer  
+		1  1    2  13
+	creer script reinitialisation base de donne 
+
+	creer main pour remplir tables param lieu et distance de donne 
+		(peut etre appel script.sql ou alors dans le code) 	
+
+brache sprint/3/2-AssignationVehicule 
+	creer api post revvoit date 
+	et retourne les voiture avec reservation 
+	et reservation sans voiture
+	
+	regle de gestion tsy azo sarahina ny client
+	izay manana capacite  
+	izay kely indrindra , izay diesel , random 
+
+frontoffice 
+
+brache sprint/3/1-AssignationVehicule
+	creer controller pour gerer assignation vehicule 
+	creer jsp avec input date 
+	creer jsp pour afficher les veihucles avec les reservation assigner 
+	et afficher les reservations qui n ont pas eu de voiture 

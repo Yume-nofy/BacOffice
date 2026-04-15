@@ -1,0 +1,20 @@
+Team lead : 3305
+Dev : 3313 , 3294
+
+backoffice
+brache sprint/1/1-InsertReservation
+ 	creer script create database 
+	creer script createa table 
+	creaer script insert into hotel
+	creer connexion base de donne projet
+ 
+	creer controlller model et jsp 
+		insertion reservation 
+
+	creer controller getReservation avec argument (date nullable)
+
+frontoffice 
+brache sprint/1/1-ListeReservation
+	creer controller recuperation reservation 
+	creer liste reservation 
+	creer liste reservation avec filtrer date 

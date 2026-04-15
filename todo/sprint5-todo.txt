@@ -1,0 +1,60 @@
+Team lead : 3305
+Dev : 3313 , 3294
+
+backoffice
+brache sprint/5/1-AssignationVehiculeAvanceII
+ 	creer script create update Hotel en Lieu
+	 
+	creer script createa table 
+	parametre
+		Vitesse Moyenne 30 ( km/h)
+		Tempsd'Attente 30 mn
+	Lieu :
+		id code libelle 
+		1 TNR   Ivato Aeroport
+		2
+	Distance 
+		id from to kilometer  
+		1  1    2  13
+	creer script reinitialisation base de donne 
+
+	creer main pour remplir tables param lieu et distance de donne 
+		(peut etre appel script.sql ou alors dans le code) 	
+
+brache sprint/3/2-AssignationVehicule 
+	creer api post revvoit date 
+	et retourne les voiture avec reservation 
+	et reservation sans voiture
+	
+	regle de gestion tsy azo sarahina ny client
+	izay manana capacite  
+	izay kely indrindra , izay diesel , random 
+
+frontoffice 
+
+brache sprint/4/1-AssignationVehiculeAvance
+	creer controller pour gerer assignation vehicule 
+	creer jsp avec input date 
+	creer jsp pour afficher les veihucles avec les reservation assigner 
+	et afficher les reservations qui n ont pas eu de voiture 
+
+
+regroupement aana client 
+temps d attente 
+afaka atambatra,  a 8h 30 mn izay vol , 8h15mn , depart ,
+
+
+Date 
+
+
+heureDepart vehicule  liste reservation(lieu) kilometrageParcouru heure de retour a la aeroport 
+
+Sprint 6 : nombre de trajet , 
+aeroport 00;00 les voitures 
+trajets , ty tafaverina 
+
+iza daholo 
+trajet ,
+
+
+

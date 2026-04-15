@@ -1,0 +1,31 @@
+Team lead : 3313
+Dev : 3305 , 3294
+
+backoffice
+brache sprint/7/1-AssignationVehiculeAvance
+ 	
+
+
+frontoffice 
+
+brache sprint/7/1-AssignationVehiculeAvance
+
+
+on boucle la liste des reservations 
+on doit trier les reservations  par date les plus ancienne d abord
+on doit grouper les reservations comme ca , on prend le preimer reservation et ajouter le temps d attente 
+et toute les reservations a l interieur de cette intervalle de temps sont un grroupe 
+pour le prochain groupe on prend la reservation apres le temps de fin du groupe avant 
+
+dans chaque groupe on doit trier par nombre de passager le plus grand d abord 
+voir les vehicules disponible , c est a dire temps de retour et entre l interavalle du groupe ou 00:00
+tout d abord pour l assignation on doit prendre le premier reservation on regarde si 
+peut entrer dans le vehicule si oui on ajoute cette reservation a la vehicule sinon on assigne et divise la reservation 
+en deux nouvelle resrvation , ou le nombre de passger du premier reservation et du meme que le vehicule , et le deuxieme est 
+le reste apres on ajoute la reservation nouvelle reste dans la liste de reservation du groupe (on trie par nombre de passager le plus 
+grand d abord avant de reassigner une nouvelle reservation ) , si il y a des restes de place disponible dans la vehicule apres l 
+assignation du vehicule on doit prendre la reservation la plus proche plus bas d abord par exmpele reste 2 et resevation a 1 place ,
+si c est l inverse , par expemple 2 passger et 1place a remplir on divise la reservation fin du boucle 
+
+
+divise en plusieru petite fonction par classe 

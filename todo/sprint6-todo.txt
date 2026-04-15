@@ -1,0 +1,33 @@
+Team lead : 3305
+Dev : 3313 , 3294
+
+backoffice
+brache sprint/6/1-AssignationVehiculeAvanceIII
+ 	
+
+
+frontoffice 
+
+brache sprint/4/1-AssignationVehiculeAvance
+
+
+regroupement aana client 
+temps d attente 
+afaka atambatra,  a 8h 30 mn izay vol , 8h15mn , depart ,
+
+
+Date 
+
+
+heureDepart vehicule  liste reservation(lieu) kilometrageParcouru heure de retour a la aeroport 
+
+ajout de verification de vehicule disponible par rapport au reservation deja fait 
+ajoute de table trajet pour stocker les trajets deja fait 
+ajout de la table assignation pour stocker les reservations au trajets 
+donc par assignation on doit stocker le trajet et assignaiton ou fait delete 
+
+
+date depart dans un groupe 
+
+save donne dans assignation et trajet 
+
