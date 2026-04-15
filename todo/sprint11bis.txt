@@ -1,0 +1,7 @@
+@autgorize 
+@role("chef")
+
+
+au niveau methode 
+annotation pour proteger role chef , execution , anonyme 
+securite : 
